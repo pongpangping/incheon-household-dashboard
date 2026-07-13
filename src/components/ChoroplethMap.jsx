@@ -6,7 +6,6 @@ import { comma, pct } from '../lib/format.js'
 import rawGeo from '../data/incheonGeo.json'
 
 const SEQ = ['#E6F3FF', '#C7E6FF', '#9AD3FF', '#66BCFF', '#33A8FF', '#0B93EE', '#008AE0', '#006BB0']
-const TYPE_COLOR = { '청년형': '#008AE0', '고령형': '#FF8A00', '균형형': '#94A3B8' }
 
 const okRing = (r) =>
   Array.isArray(r) && r.length >= 4 &&
@@ -26,9 +25,10 @@ function cleanGeometry(g) {
 const codeOf = (f) =>
   String(f.properties?.SIG_CD ?? f.properties?.sig_cd ?? f.properties?.code ?? '').slice(0, 5)
 
-export default function ChoroplethMap({ rows, selected, hovered, onSelect, onHover, metricKey, typeFilter }) {
+export default function ChoroplethMap({ rows, selected, hovered, onSelect, onHover, metricKey, avgFilter, avgValue }) {
   const geoRef = useRef(null)
   const [map, setMap] = useState(null)
+  const [zoom, setZoom] = useState(10)
 
   const { geo, status } = useMemo(() => {
     const features = ((rawGeo && rawGeo.features) || [])
@@ -51,28 +51,41 @@ export default function ChoroplethMap({ rows, selected, hovered, onSelect, onHov
     const t = Math.max(0, Math.min(1, (v - min) / (max - min)))
     return SEQ[Math.round(t * (SEQ.length - 1))]
   }
+  const matchAvg = (row) => {
+    if (!avgFilter || row?.[metric.key] == null) return true
+    return avgFilter === 'above' ? row[metric.key] >= avgValue : row[metric.key] < avgValue
+  }
   const styleFor = (f) => {
     const code = codeOf(f); const row = byCode[code]
     const isSel = code === selected, isHov = code === hovered
-    const matches = !typeFilter || row?.oneType === typeFilter
+    const matches = matchAvg(row)
     return {
       fillColor: fillFor(row?.[metric.key]),
       fillOpacity: !matches ? 0.12 : (selected && !isSel) || (hovered && !isHov) ? 0.6 : 0.92,
-      color: isSel ? '#17181d' : isHov ? '#3a3f4a' : '#ffffff',
+      color: isSel ? '#0F172A' : isHov ? '#334155' : '#ffffff',
       weight: isSel ? 3 : isHov ? 2.2 : 1.2,
       opacity: !matches ? 0.4 : 1,
     }
   }
   const hoverCard = (row) => `
-    <div class="mtip-h"><b>${row.name}</b>
-      <span class="mtip-type" style="background:${TYPE_COLOR[row.oneType] || '#8a909c'}">${row.oneType || ''}</span></div>
+    <div class="mtip-h"><b>${row.name}</b></div>
     <div class="mtip-row"><span>${metric.label}</span><b>${metric.fmt(row[metric.key])}</b></div>
-    <div class="mtip-row"><span>1인가구 비율</span><b>${pct(row.onePersonRate)}</b></div>
     <div class="mtip-row"><span>인구 / 세대</span><b>${comma(row.population)} / ${comma(row.households)}</b></div>`
+  const popupCard = (row) => `
+    <div class="mpop">
+      <div class="mpop-h">${row.name}</div>
+      <div class="mtip-row"><span>1인가구 비율</span><b>${pct(row.onePersonRate)}</b></div>
+      <div class="mtip-row"><span>고령 1인가구 비중</span><b>${pct(row.agedOneShareOfOne)}</b></div>
+      <div class="mtip-row"><span>세대당 인구</span><b>${row.avgHouseholdSize}명</b></div>
+      <div class="mtip-row"><span>인구 / 세대</span><b>${comma(row.population)} / ${comma(row.households)}</b></div>
+    </div>`
 
   const onEachFeature = (feature, layer) => {
     const row = byCode[codeOf(feature)]
-    if (row) layer.bindTooltip(hoverCard(row), { sticky: true, direction: 'top', opacity: 1, className: 'm-tooltip' })
+    if (row) {
+      layer.bindTooltip(hoverCard(row), { sticky: true, direction: 'top', opacity: 1, className: 'm-tooltip' })
+      layer.bindPopup(popupCard(row), { closeButton: true, className: 'm-popup', offset: [0, -4] })
+    }
     layer.on({
       click: () => onSelect(codeOf(feature)),
       mouseover: () => onHover?.(codeOf(feature)),
@@ -86,15 +99,34 @@ export default function ChoroplethMap({ rows, selected, hovered, onSelect, onHov
     geoRef.current.eachLayer((l) => {
       const row = byCode[codeOf(l.feature)]
       if (row && l.getTooltip()) l.setTooltipContent(hoverCard(row))
+      if (row && l.getPopup()) l.setPopupContent(popupCard(row))
     })
   })
 
+  const firstRef = useRef(true)
   useEffect(() => {
     if (!map || !geoRef.current) return
+    if (firstRef.current) {   // 초기: 인천 전체 개요 (범례 표시)
+      firstRef.current = false
+      try { map.fitBounds(geoRef.current.getBounds(), { padding: [30, 30] }) } catch (e) { /* noop */ }
+      return
+    }
     let target
     geoRef.current.eachLayer((l) => { if (codeOf(l.feature) === selected) target = l })
-    if (target) map.flyToBounds(target.getBounds(), { maxZoom: 11, padding: [50, 50], duration: 0.7 })
+    if (target) {
+      map.flyToBounds(target.getBounds(), { maxZoom: 11, padding: [50, 50], duration: 0.7 })
+      target.openPopup()
+    }
   }, [selected, map])
+
+  // 줌 레벨 추적 → 범례는 축소(개요) 상태에서만 표시
+  useEffect(() => {
+    if (!map) return
+    const onZoom = () => setZoom(map.getZoom())
+    map.on('zoomend', onZoom); setZoom(map.getZoom())
+    return () => map.off('zoomend', onZoom)
+  }, [map])
+  const showLegend = zoom <= 10
 
   // 범례 버킷 (연속 → 5구간)
   const buckets = useMemo(() => {
@@ -126,15 +158,17 @@ export default function ChoroplethMap({ rows, selected, hovered, onSelect, onHov
         <ZoomControl position="topright" />
       </MapContainer>
 
-      <div className="maplegend">
-        <h4>{metric.label}</h4>
-        {buckets.map((b, i) => (
-          <div className="ml-row" key={i}>
-            <i style={{ background: b.color }} />
-            {metric.fmt(Math.round(b.lo * 10) / 10)} ~ {metric.fmt(Math.round(b.hi * 10) / 10)}
-          </div>
-        ))}
-      </div>
+      {showLegend && (
+        <div className="maplegend">
+          <h4>{metric.label}</h4>
+          {buckets.map((b, i) => (
+            <div className="ml-row" key={i}>
+              <i style={{ background: b.color }} />
+              {metric.fmt(Math.round(b.lo * 10) / 10)} ~ {metric.fmt(Math.round(b.hi * 10) / 10)}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

@@ -17,13 +17,14 @@ function Card({ n, title, children }) {
   )
 }
 
-export default function CenterPanel({ rows, summary, trend, link, metricKey, typeFilter, selectedRow, rank, total }) {
+export default function CenterPanel({ rows, summary, trend, link, metricKey, avgFilter, avgValue, selectedRow, rank, total }) {
   const metric = metricBy(metricKey)
+  const filterLabel = avgFilter === 'above' ? '평균 이상' : avgFilter === 'below' ? '평균 미만' : null
   return (
     <div className="center">
       <div className="breadcrumb">
         선택 지역<b>{selectedRow?.name ?? '—'}</b> · 지표<b>{metric.label}</b>
-        {typeFilter && <> · 필터<b>{typeFilter}</b></>}
+        {filterLabel && <> · 필터<b>{filterLabel}</b></>}
       </div>
 
       <Card n="1" title="선택 시군구 상세">
@@ -31,14 +32,14 @@ export default function CenterPanel({ rows, summary, trend, link, metricKey, typ
       </Card>
 
       <Card n="2" title={`시군구 순위 · ${metric.label}`}>
-        <RankList rows={rows} {...link} metricKey={metricKey} typeFilter={typeFilter} />
+        <RankList rows={rows} {...link} metricKey={metricKey} avgFilter={avgFilter} avgValue={avgValue} />
       </Card>
 
-      <Card n="3" title="1인가구 연령구조 · 정책 유형">
-        <AgeStructure rows={rows} {...link} typeFilter={typeFilter} bare />
+      <Card n="3" title="1인가구 연령대 구성">
+        <AgeStructure rows={rows} {...link} bare />
       </Card>
 
-      <Card n="4" title="정책 유형 사분면 · 고령 1인가구">
+      <Card n="4" title="1인가구 비율 × 고령 비중">
         <ScatterAgedOne rows={rows} {...link} summary={summary} bare />
       </Card>
 

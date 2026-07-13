@@ -3,24 +3,15 @@ import { comma, pct } from '../lib/format.js'
 
 const DONUT = ['#008AE0', '#33A8FF', '#FFA233', '#A033FF'] // 1인/2인/3인/4인+
 
-function CompareRow({ label, v, avg, unit }) {
-  if (v == null || avg == null) return null
-  const max = Math.max(v, avg) * 1.15
-  const diff = v - avg
-  const sign = diff > 0 ? '+' : ''
-  const col = diff > 0 ? '#c0392b' : '#1c7c4a'
+function Tile({ label, value, unit, delta, deltaUnit }) {
+  const up = delta > 0
+  const col = up ? '#DC2626' : '#0EA5E9'
   return (
-    <div className="cmp">
-      <div className="cmp-top">
-        <span className="cmp-label">{label}</span>
-        <span className="cmp-val">{unit === '%' ? pct(v) : `${v}${unit}`}
-          <span className="cmp-diff" style={{ color: col }}>
-            ({sign}{unit === '%' ? `${diff.toFixed(1)}p` : diff.toFixed(2)})</span>
-        </span>
-      </div>
-      <div className="cmp-track">
-        <div className="cmp-avg" style={{ left: `${(avg / max) * 100}%` }} title="인천 평균" />
-        <div className="cmp-bar" style={{ width: `${(v / max) * 100}%` }} />
+    <div className="dp-tile">
+      <div className="dp-tile-k">{label}</div>
+      <div className="dp-tile-v">{value}<span>{unit}</span></div>
+      <div className="dp-tile-d" style={{ color: col }}>
+        평균 {up ? '▲' : '▼'} {Math.abs(delta).toFixed(deltaUnit === 'p' ? 1 : 2)}{deltaUnit}
       </div>
     </div>
   )
@@ -35,59 +26,46 @@ export default function DistrictPanel({ row, rank, total, summary }) {
     { name: '4인+', value: row.fourPlusPerson },
   ].filter((d) => d.value != null)
 
-  const stats = [
-    { k: '인구 (2025)', v: `${comma(row.population)}명` },
-    { k: '세대수 (2025)', v: `${comma(row.households)}세대` },
-  ]
-
   return (
     <>
-      <div className="panel-head">
-        <span className="name">{row.name}</span>
-        {row.oneType && (
-          <span className="type-tag" style={{
-            background: { '청년형': '#008AE0', '고령형': '#FF8A00', '균형형': '#94A3B8' }[row.oneType],
-          }}>{row.oneType}</span>
-        )}
-        <span className="rank">1인가구 비율 인천 {rank}위 / {total}</span>
+      <div className="dp-head">
+        <span className="dp-name">{row.name}</span>
+        <span className="dp-rank">1인가구 비율 인천 {rank}위 / {total}</span>
       </div>
-      <div className="card-sub">가구원수별 구성 (KOSIS 인구총조사, 2023)</div>
 
-      <div className="donut-wrap">
-        <ResponsiveContainer width={158} height={158}>
-          <PieChart>
-            <Pie data={donut} dataKey="value" nameKey="name" innerRadius={48} outerRadius={72}
-              startAngle={90} endAngle={-270} stroke="#ffffff" strokeWidth={2}
-              isAnimationActive={true} animationDuration={400}>
-              {donut.map((d, i) => <Cell key={d.name} fill={DONUT[i]} />)}
-            </Pie>
-            <text x="50%" y="46%" textAnchor="middle" className="donut-center-val">
-              {pct(row.onePersonRate)}
-            </text>
-            <text x="50%" y="59%" textAnchor="middle" className="donut-center">1인가구</text>
-          </PieChart>
-        </ResponsiveContainer>
-        <div style={{ flex: 1 }}>
-          <div className="chips">
-            {donut.map((d, i) => (
-              <span className="chip" key={d.name}>
-                <span style={{ color: DONUT[i], fontWeight: 700 }}>●</span>{' '}
-                {d.name} <b>{comma(d.value)}</b>
-              </span>
-            ))}
-          </div>
-          <div className="stat-list2">
-            {stats.map((s) => (
-              <div className="stat" key={s.k}>
-                <div className="k">{s.k}</div>
-                <div className="v">{s.v}</div>
-              </div>
-            ))}
-          </div>
+      <div className="dp-donutrow">
+        <div className="dp-donut">
+          <ResponsiveContainer width={124} height={124}>
+            <PieChart>
+              <Pie data={donut} dataKey="value" nameKey="name" innerRadius={40} outerRadius={58}
+                startAngle={90} endAngle={-270} stroke="#fff" strokeWidth={2} isAnimationActive>
+                {donut.map((d, i) => <Cell key={d.name} fill={DONUT[i]} />)}
+              </Pie>
+              <text x="50%" y="47%" textAnchor="middle" className="donut-center-val">{pct(row.onePersonRate)}</text>
+              <text x="50%" y="61%" textAnchor="middle" className="donut-center">1인가구</text>
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+        <div className="dp-comp">
+          <div className="dp-comp-title">가구원수 구성 · 2023</div>
+          {donut.map((d, i) => (
+            <div className="dp-comp-row" key={d.name}>
+              <i style={{ background: DONUT[i] }} /><span>{d.name}</span><b>{comma(d.value)}</b>
+            </div>
+          ))}
         </div>
       </div>
 
-      <div className="agemini-title">1인가구 연령구성</div>
+      <div className="dp-tiles">
+        <Tile label="1인가구 비율" value={row.onePersonRate} unit="%"
+          delta={row.onePersonRate - summary.onePersonRate} deltaUnit="p" />
+        <Tile label="고령 1인가구" value={row.agedOneShareOfOne} unit="%"
+          delta={row.agedOneShareOfOne - summary.agedOneShareOfOne} deltaUnit="p" />
+        <Tile label="세대당 인구" value={row.avgHouseholdSize} unit="명"
+          delta={row.avgHouseholdSize - summary.avgHouseholdSize} deltaUnit="명" />
+      </div>
+
+      <div className="dp-sub">1인가구 연령대 구성</div>
       <div className="agemini">
         <span className="am-seg" style={{ width: `${row.youngOneShare}%`, background: '#33A8FF' }} />
         <span className="am-seg" style={{ width: `${row.midOneShare}%`, background: '#94A3B8' }} />
@@ -99,12 +77,7 @@ export default function DistrictPanel({ row, rank, total, summary }) {
         <span><i style={{ background: '#FF8A00' }} />고령 {pct(row.agedOneShareOfOne)}</span>
       </div>
 
-      <div className="cmp-title">인천 평균 대비 <span>(막대 위 선 = 인천 평균)</span></div>
-      <div className="cmp-list">
-        <CompareRow label="1인가구 비율" v={row.onePersonRate} avg={summary.onePersonRate} unit="%" />
-        <CompareRow label="고령 1인가구 비중" v={row.agedOneShareOfOne} avg={summary.agedOneShareOfOne} unit="%" />
-        <CompareRow label="세대당 인구" v={row.avgHouseholdSize} avg={summary.avgHouseholdSize} unit="명" />
-      </div>
+      <div className="dp-foot">인구 <b>{comma(row.population)}</b>명 · 세대 <b>{comma(row.households)}</b>세대 (주민등록 2025)</div>
     </>
   )
 }

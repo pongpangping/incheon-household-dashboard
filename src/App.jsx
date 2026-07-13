@@ -17,22 +17,24 @@ export default function App() {
   const [selected, setSelected] = useState(ranked[0]?.code ?? sigungu[0].code)
   const [hovered, setHovered] = useState(null)
   const [metric, setMetric] = useState('onePersonRate')
-  const [typeFilter, setTypeFilter] = useState(null)
+  const [avgFilter, setAvgFilter] = useState(null)  // null | 'above' | 'below' (인천 평균 대비)
 
   const selectedRow = sigungu.find((r) => r.code === selected)
   const rank = ranked.findIndex((r) => r.code === selected) + 1
   const link = { selected, hovered, onSelect: setSelected, onHover: setHovered }
+  const avgValue = summary[metric]
 
   return (
     <div className="shell">
       <Header summary={summary} />
       <div className="body">
-        <ChoroplethMap rows={sigungu} {...link} metricKey={metric} typeFilter={typeFilter} />
+        <ChoroplethMap rows={sigungu} {...link} metricKey={metric}
+          avgFilter={avgFilter} avgValue={avgValue} />
         <Sidebar rows={sigungu} summary={summary} metricKey={metric} onMetric={setMetric}
-          typeFilter={typeFilter} onTypeFilter={setTypeFilter}
+          avgFilter={avgFilter} onAvgFilter={setAvgFilter} avgValue={avgValue}
           selected={selected} onSelect={setSelected} />
         <CenterPanel rows={sigungu} summary={summary} trend={trend} link={link}
-          metricKey={metric} typeFilter={typeFilter}
+          metricKey={metric} avgFilter={avgFilter} avgValue={avgValue}
           selectedRow={selectedRow} rank={rank} total={ranked.length} />
       </div>
     </div>

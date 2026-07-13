@@ -20,9 +20,9 @@ export default function ScatterAgedOne({ rows, selected, hovered, onSelect, onHo
 
   return (
     <div className={bare ? 'chart-bare' : 'glass card'}>
-      {!bare && <h2>정책 유형 사분면 · 고령 1인가구</h2>}
+      {!bare && <h2>1인가구 비율 × 고령 비중</h2>}
       <div className="card-sub">
-        X 1인가구 비율 · Y 고령(65+) 비중 · 원 크기 1인가구 수 · 십자선 = 인천 평균 · 우상단일수록 돌봄 우선
+        X 1인가구 비율 · Y 고령(65+) 비중 · 원 크기 1인가구 수 · 십자선 = 인천 평균
       </div>
       <ResponsiveContainer width="100%" height={330}>
         <ScatterChart margin={{ left: 6, right: 22, top: 14, bottom: 18 }}>
@@ -36,11 +36,9 @@ export default function ScatterAgedOne({ rows, selected, hovered, onSelect, onHo
             label={{ value: '고령 비중(%) →', angle: -90, position: 'insideLeft',
               fill: '#8a909c', fontSize: 11 }} />
           <ZAxis type="number" dataKey="z" range={[90, 620]} />
-          <ReferenceLine x={ax} stroke="#b7bdc9" strokeDasharray="4 3" />
-          <ReferenceLine y={ay} stroke="#b7bdc9" strokeDasharray="4 3" />
-          <ReferenceArea x1={ax} y1={ay} x2={999} y2={999} fill="#FF8A00" fillOpacity={0.07}
-            label={{ value: '돌봄 우선(고령·1인 동반↑)', position: 'insideTopRight',
-              fill: '#C2410C', fontSize: 10.5, fontWeight: 600 }} />
+          <ReferenceLine x={ax} stroke="#CBD5E1" strokeDasharray="4 3"
+            label={{ value: '평균', position: 'top', fill: '#94A3B8', fontSize: 10 }} />
+          <ReferenceLine y={ay} stroke="#CBD5E1" strokeDasharray="4 3" />
           <Tooltip cursor={{ strokeDasharray: '3 3', stroke: 'rgba(20,30,60,0.25)' }}
             formatter={(v, n) => n === '1인가구 수' ? comma(v) : pct(v)} />
           <Scatter data={data} isAnimationActive={false}

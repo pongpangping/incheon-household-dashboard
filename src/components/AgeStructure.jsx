@@ -1,5 +1,5 @@
 import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LabelList,
+  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell,
 } from 'recharts'
 import { pct } from '../lib/format.js'
 
@@ -8,30 +8,16 @@ const SEG = [
   { key: 'midOneShare', name: '중년(40~64)', color: '#94A3B8' },
   { key: 'agedOneShareOfOne', name: '고령(65+)', color: '#FF8A00' },
 ]
-const TYPE_COLOR = { '청년형': '#008AE0', '고령형': '#FF8A00', '균형형': '#94A3B8' }
 
-export default function AgeStructure({ rows, selected, hovered, onSelect, onHover, typeFilter, bare }) {
+export default function AgeStructure({ rows, selected, hovered, onSelect, onHover, bare }) {
   const data = [...rows]
     .filter((r) => r.agedOneShareOfOne != null)
     .sort((a, b) => b.agedOneShareOfOne - a.agedOneShareOfOne)
-  const dim = (code) => {
-    const r = data.find((x) => x.code === code)
-    if (typeFilter && r?.oneType !== typeFilter) return true
-    return (selected && code !== selected) || (hovered && code !== hovered)
-  }
-
-  const TypeTag = ({ x, y, width, height, index }) => {
-    const t = data[index]?.oneType
-    if (!t) return null
-    return (
-      <text x={x + width + 8} y={y + height / 2} dy={4}
-        fill={TYPE_COLOR[t]} fontSize={11.5} fontWeight={700}>{t}</text>
-    )
-  }
+  const dim = (code) => (selected && code !== selected) || (hovered && code !== hovered)
 
   return (
     <div className={bare ? 'chart-bare' : 'glass card'}>
-      {!bare && <h2>1인가구 연령구조 · 정책 유형</h2>}
+      {!bare && <h2>1인가구 연령대 구성</h2>}
       <div className="card-sub">
         시군구별 1인가구를 연령대로 분해 (KOSIS 2023) · 고령 비중 높은 순 · 클릭하면 지도 이동
       </div>
@@ -40,12 +26,12 @@ export default function AgeStructure({ rows, selected, hovered, onSelect, onHove
       </div>
       <ResponsiveContainer width="100%" height={332}>
         <BarChart data={data} layout="vertical" stackOffset="expand"
-          margin={{ left: 8, right: 62, top: 4, bottom: 4 }} barCategoryGap={5}>
+          margin={{ left: 8, right: 12, top: 4, bottom: 4 }} barCategoryGap={5}>
           <XAxis type="number" hide domain={[0, 1]} />
           <YAxis type="category" dataKey="name" width={62} tickLine={false} axisLine={false} />
           <Tooltip cursor={{ fill: 'rgba(20,30,60,0.05)' }}
             formatter={(v, n, p) => [pct(p.payload[SEG.find((s) => s.name === n).key]), n]} />
-          {SEG.map((s, si) => (
+          {SEG.map((s) => (
             <Bar key={s.key} dataKey={s.key} stackId="a" name={s.name}
               isAnimationActive={false} cursor="pointer"
               onClick={(d) => onSelect(d.code)}
@@ -53,10 +39,9 @@ export default function AgeStructure({ rows, selected, hovered, onSelect, onHove
               {data.map((d) => (
                 <Cell key={d.code} fill={s.color}
                   fillOpacity={dim(d.code) ? 0.4 : 1}
-                  stroke={d.code === selected ? '#16181d' : '#fff'}
+                  stroke={d.code === selected ? '#0F172A' : '#fff'}
                   strokeWidth={d.code === selected ? 1.4 : 0.6} />
               ))}
-              {si === SEG.length - 1 && <LabelList content={TypeTag} />}
             </Bar>
           ))}
         </BarChart>

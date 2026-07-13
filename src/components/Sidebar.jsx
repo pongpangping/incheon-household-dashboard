@@ -1,23 +1,20 @@
-import { METRICS } from '../lib/metrics.js'
+import { METRICS, metricBy } from '../lib/metrics.js'
 import { pct } from '../lib/format.js'
 
-const TYPES = ['청년형', '고령형', '균형형']
-const TYPE_COLOR = { '청년형': '#008AE0', '고령형': '#FF8A00', '균형형': '#94A3B8' }
-
 export default function Sidebar({
-  rows, summary, metricKey, onMetric, typeFilter, onTypeFilter, selected, onSelect,
+  rows, summary, metricKey, onMetric, avgFilter, onAvgFilter, avgValue, selected, onSelect,
 }) {
-  const metric = METRICS.find((m) => m.key === metricKey) ?? METRICS[0]
+  const metric = metricBy(metricKey)
   const vals = rows.map((r) => r[metricKey]).filter((x) => x != null)
   const min = Math.min(...vals), max = Math.max(...vals)
-  const count = (t) => rows.filter((r) => r.oneType === t).length
   const ordered = [...rows].sort((a, b) => a.name.localeCompare(b.name, 'ko'))
+  const nAbove = rows.filter((r) => r[metricKey] >= avgValue).length
 
   return (
     <aside className="sidebar">
       <div className="sb-badge"><i>지표</i><span>지도에 표시할 지표를 선택하세요</span></div>
 
-      {/* 지도 지표 — AR6 아코디언(활성 헤더 + 하위 항목) */}
+      {/* 지도 지표 — 아코디언 */}
       <div className="acc">
         <div className="acc-head">
           <span className="acc-ic">◧</span><span className="acc-title">지도 지표</span><span className="acc-minus">–</span>
@@ -34,15 +31,15 @@ export default function Sidebar({
       </div>
 
       <div className="sb-legend">
-        <span>{metric.fmt ? metric.fmt(min) : min}</span>
+        <span>{metric.fmt(min)}</span>
         <div className="lg-bar" />
-        <span>{metric.fmt ? metric.fmt(max) : max}</span>
+        <span>{metric.fmt(max)}</span>
       </div>
 
       <div className="sb-block">
         <div className="sb-label">데이터 선택</div>
 
-        {/* 시군구 선택 드롭다운 (AR6 dropdown 형) */}
+        {/* 시군구 선택 드롭다운 */}
         <label className="dropdown">
           <span className="dd-label">시군구 선택</span>
           <span className="dd-value">{rows.find((r) => r.code === selected)?.name ?? '선택'}
@@ -52,17 +49,16 @@ export default function Sidebar({
           </select>
         </label>
 
-        {/* 정책 유형 필터 (세그먼트 토글) */}
-        <div className="dd-sublabel">정책 유형 필터</div>
+        {/* 인천 평균 대비 필터 (데이터 기반) */}
+        <div className="dd-sublabel">인천 평균 대비 · {metric.fmt(avgValue)}</div>
         <div className="seg-toggle">
-          <button className={!typeFilter ? 'active' : ''} onClick={() => onTypeFilter(null)}>전체</button>
-          {TYPES.map((t) => (
-            <button key={t} className={typeFilter === t ? 'active' : ''}
-              onClick={() => onTypeFilter(typeFilter === t ? null : t)}
-              style={typeFilter === t ? { color: TYPE_COLOR[t], borderColor: TYPE_COLOR[t] } : undefined}>
-              <i style={{ background: TYPE_COLOR[t] }} />{t}<em>{count(t)}</em>
-            </button>
-          ))}
+          <button className={!avgFilter ? 'active' : ''} onClick={() => onAvgFilter(null)}>전체</button>
+          <button className={avgFilter === 'above' ? 'active' : ''}
+            onClick={() => onAvgFilter(avgFilter === 'above' ? null : 'above')}>
+            평균 이상<em>{nAbove}</em></button>
+          <button className={avgFilter === 'below' ? 'active' : ''}
+            onClick={() => onAvgFilter(avgFilter === 'below' ? null : 'below')}>
+            평균 미만<em>{rows.length - nAbove}</em></button>
         </div>
       </div>
 
