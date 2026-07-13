@@ -1,0 +1,210 @@
+/* ============================================================
+   인천 1인가구 · 세대구조 대시보드 — AR6 스타일
+   깔끔한 흰색 플랫 카드 · 파란 액센트 · 헤더/사이드바/중앙카드/지도
+   ============================================================ */
+:root {
+  --accent: #2a78d6;
+  --accent-strong: #1c5cab;
+  --accent-weak: #eaf1fc;
+  --ink: #1b1e26;
+  --ink2: #58616f;
+  --ink3: #98a1b2;
+  --line: #e9ecf3;
+  --line-strong: #dde1ea;
+  --surface: #ffffff;
+  --bg: #eef1f6;
+  --active: #17181d;
+  --radius: 14px;
+  --shadow-card: 0 2px 10px rgba(23,33,60,0.06), 0 1px 3px rgba(23,33,60,0.04);
+  --shadow-float: 0 8px 28px rgba(23,33,60,0.14);
+  --t-young: #2a78d6; --t-old: #eb6834; --t-bal: #8a909c;
+  --series-2: #1baf7a; --series-3: #eda100; --series-5: #4a3aa7; --series-6: #e34948; --good: #147a3e;
+}
+
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; margin: 0; }
+body {
+  font-family: "Pretendard", system-ui, -apple-system, "Segoe UI", "Apple SD Gothic Neo",
+    "Malgun Gothic", sans-serif;
+  color: var(--ink); background: var(--bg); -webkit-font-smoothing: antialiased;
+}
+button { font-family: inherit; }
+
+/* ── 셸 ─────────────────────────────────────────────── */
+.shell { position: fixed; inset: 0; display: flex; flex-direction: column; }
+
+/* ── 헤더 ───────────────────────────────────────────── */
+.header { height: 58px; flex: none; background: var(--surface); border-bottom: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 30; }
+.hd-left { display: flex; align-items: center; gap: 11px; }
+.hd-logo { width: 32px; height: 32px; border-radius: 9px; background: var(--active); color: #fff;
+  display: grid; place-items: center; font-weight: 800; font-size: 15px; }
+.hd-title { font-size: 16px; font-weight: 750; letter-spacing: -0.02em; }
+.hd-title small { display: block; font-size: 11px; font-weight: 500; color: var(--ink3); margin-top: 1px; }
+.hd-right { display: flex; align-items: center; gap: 16px; }
+.hd-chips { display: flex; gap: 14px; }
+.hd-chip { font-size: 12px; color: var(--ink2); }
+.hd-chip b { color: var(--ink); font-size: 15px; font-weight: 750; margin-left: 5px; }
+.hd-badge { background: var(--accent); color: #fff; font-size: 12.5px; font-weight: 650;
+  padding: 7px 14px; border-radius: 9px; }
+
+/* ── 바디: 지도 배경 + 좌측 사이드바 + 중앙 카드 ─────── */
+.body { flex: 1; position: relative; min-height: 0; }
+
+.map-canvas { position: absolute; inset: 0; z-index: 0; }
+.map-canvas .leaflet-container { background: #e9eef5; font: inherit; }
+.map-empty { position: absolute; inset: 0; display: grid; place-items: center; color: var(--ink2); }
+.map-empty code { background: #eef1f6; padding: 3px 8px; border-radius: 6px; }
+
+/* ── 사이드바 ───────────────────────────────────────── */
+.sidebar { position: absolute; top: 14px; left: 14px; bottom: 14px; width: 246px; z-index: 20;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow-card); padding: 16px; display: flex; flex-direction: column; gap: 18px;
+  overflow-y: auto; }
+.sb-badge { display: inline-flex; align-items: center; gap: 8px; }
+.sb-badge i { background: var(--accent); color: #fff; font-size: 11px; font-weight: 800; padding: 3px 7px;
+  border-radius: 6px; letter-spacing: 0.02em; }
+.sb-badge span { font-size: 12px; color: var(--ink3); }
+.sb-sec-title { font-size: 12px; font-weight: 700; color: var(--ink2); margin-bottom: 9px; }
+
+/* 지표 리스트 (아코디언 서브아이템 느낌) */
+.metric-list { display: flex; flex-direction: column; gap: 4px; }
+.metric-item { display: flex; flex-direction: column; text-align: left; gap: 1px; border: 1px solid var(--line);
+  background: var(--surface); border-radius: 10px; padding: 9px 12px; cursor: pointer; transition: all .13s; }
+.metric-item:hover { border-color: var(--line-strong); background: #fafbfd; }
+.metric-item.active { background: var(--active); border-color: var(--active); }
+.metric-item.active .mi-name { color: #fff; }
+.metric-item.active .mi-desc { color: rgba(255,255,255,0.66); }
+.mi-name { font-size: 13.5px; font-weight: 650; color: var(--ink); }
+.mi-desc { font-size: 11px; color: var(--ink3); }
+
+/* 유형 필터 칩 */
+.type-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.type-chips button { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600;
+  color: var(--ink2); background: var(--surface); border: 1px solid var(--line); border-radius: 999px;
+  padding: 5px 11px; cursor: pointer; transition: all .13s; }
+.type-chips button:hover { border-color: var(--line-strong); }
+.type-chips button.active { border-color: currentColor; background: var(--accent-weak); }
+.type-chips button i { width: 8px; height: 8px; border-radius: 50%; }
+.type-chips button:first-child i { display: none; }
+.type-chips button em { font-style: normal; font-size: 10.5px; color: var(--ink3); }
+
+/* 사이드바 범례 */
+.sb-legend { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 10.5px;
+  color: var(--ink2); font-variant-numeric: tabular-nums; }
+.sb-legend .lg-bar { flex: 1; height: 8px; border-radius: 5px;
+  background: linear-gradient(90deg,#e8f1fd,#9ec5f4,#3987e5,#1c5cab,#0d366b); }
+
+.sb-summary { margin-top: auto; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 7px;
+  border-top: 1px solid var(--line); padding-top: 14px; }
+.sb-summary div { background: #f6f8fb; border-radius: 10px; padding: 8px; text-align: center; }
+.sb-summary span { display: block; font-size: 10px; color: var(--ink3); }
+.sb-summary b { font-size: 15px; font-weight: 750; }
+
+/* ── 중앙 차트 카드 열 ──────────────────────────────── */
+.center { position: absolute; top: 14px; left: 274px; bottom: 14px; width: 348px; z-index: 20;
+  display: flex; flex-direction: column; gap: 12px; overflow-y: auto; padding-right: 2px; }
+.breadcrumb { background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+  box-shadow: var(--shadow-card); padding: 12px 15px; font-size: 12.5px; color: var(--ink3); flex: none; }
+.breadcrumb b { color: var(--accent); font-weight: 700; margin-left: 6px; }
+.ccard { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow-card); padding: 14px 16px; flex: none; }
+.ccard-head { display: flex; align-items: center; gap: 9px; margin-bottom: 10px; }
+.ccard-num { width: 21px; height: 21px; border-radius: 50%; background: var(--accent); color: #fff;
+  font-size: 12px; font-weight: 700; display: grid; place-items: center; flex: none; }
+.ccard-title { font-size: 13.5px; font-weight: 700; letter-spacing: -0.01em; }
+.ccard-sub { font-size: 11px; color: var(--ink3); margin: -4px 0 10px 30px; }
+
+/* ── 지도 위 요소 ───────────────────────────────────── */
+.maplegend { position: absolute; right: 16px; bottom: 26px; z-index: 15; background: var(--surface);
+  border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow-float); padding: 11px 13px; }
+.maplegend h4 { margin: 0 0 8px; font-size: 12px; font-weight: 700; }
+.ml-row { display: flex; align-items: center; gap: 8px; font-size: 11.5px; color: var(--ink2); padding: 2px 0; }
+.ml-row i { width: 15px; height: 15px; border-radius: 4px; }
+.leaflet-control-zoom { border: 1px solid var(--line) !important; border-radius: 12px !important;
+  box-shadow: var(--shadow-float) !important; overflow: hidden; }
+.leaflet-control-zoom a { color: var(--ink2) !important; }
+.leaflet-bar a { background: var(--surface) !important; }
+
+/* 지도 호버 카드 (툴팁) */
+.m-tooltip { background: var(--surface) !important; border: 1px solid var(--line) !important;
+  border-radius: 11px !important; box-shadow: var(--shadow-float) !important; color: var(--ink) !important;
+  font: inherit !important; padding: 9px 12px !important; }
+.leaflet-tooltip-top.m-tooltip::before { border-top-color: var(--surface) !important; }
+.mtip-h { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; }
+.mtip-h b { font-size: 13.5px; }
+.mtip-type { font-size: 10px; font-weight: 700; color: #fff; padding: 2px 6px; border-radius: 999px; }
+.mtip-row { display: flex; justify-content: space-between; gap: 16px; font-size: 11.5px; color: var(--ink2); }
+.mtip-row b { color: var(--ink); }
+
+/* ── 공용 컴포넌트(카드 내부) ───────────────────────── */
+.chart-bare { width: 100%; }
+.chart-bare .card-sub { font-size: 11px; color: var(--ink3); margin-bottom: 8px; }
+
+/* 상세: 유형 태그 · 순위 */
+.panel-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.panel-head .name { font-size: 17px; font-weight: 750; }
+.type-tag { font-size: 11px; font-weight: 700; color: #fff; padding: 3px 9px; border-radius: 999px; }
+.panel-head .rank { font-size: 11.5px; color: var(--ink3); margin-left: auto; }
+
+.donut-wrap { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+.donut-center-val { font-size: 19px; font-weight: 780; fill: var(--ink); }
+.donut-center { font-size: 11px; fill: var(--ink2); }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip { font-size: 11.5px; color: var(--ink2); background: #f6f8fb; border: 1px solid var(--line);
+  border-radius: 999px; padding: 4px 9px; }
+.chip b { color: var(--ink); font-weight: 700; }
+.stat-list2 { display: flex; gap: 16px; margin-top: 12px; }
+.stat .k { color: var(--ink3); font-size: 11px; }
+.stat .v { font-size: 15px; font-weight: 700; margin-top: 2px; white-space: nowrap;
+  font-variant-numeric: tabular-nums; }
+
+/* 연령구성 미니바 */
+.agemini-title { margin-top: 14px; font-size: 12px; font-weight: 650; }
+.agemini { display: flex; height: 12px; border-radius: 6px; overflow: hidden; margin-top: 6px; gap: 1.5px; }
+.agemini-legend { display: flex; gap: 12px; margin-top: 6px; font-size: 11px; color: var(--ink2); }
+.agemini-legend span { display: inline-flex; align-items: center; gap: 4px; }
+.agemini-legend i { width: 9px; height: 9px; border-radius: 2px; }
+
+/* 평균 대비 */
+.cmp-title { margin-top: 16px; font-size: 12.5px; font-weight: 650; }
+.cmp-title span { color: var(--ink3); font-weight: 400; font-size: 11px; }
+.cmp-list { display: flex; flex-direction: column; gap: 13px; margin-top: 11px; }
+.cmp-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px; }
+.cmp-label { font-size: 12px; color: var(--ink2); }
+.cmp-val { font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.cmp-diff { font-size: 11px; font-weight: 600; margin-left: 4px; }
+.cmp-track { position: relative; height: 9px; border-radius: 5px; background: #eef1f6; }
+.cmp-bar { height: 100%; border-radius: 5px; background: linear-gradient(90deg,#6da7ec,#2a78d6); transition: width .35s; }
+.cmp-avg { position: absolute; top: -3px; width: 2px; height: 15px; border-radius: 2px; background: var(--ink); transition: left .35s; }
+
+/* 순위 리스트 */
+.rank-list { display: flex; flex-direction: column; gap: 1px; }
+.rank-row { display: grid; grid-template-columns: 18px 11px 1fr 70px auto; align-items: center; gap: 8px;
+  background: transparent; border: 0; border-radius: 9px; padding: 7px 8px; cursor: pointer; text-align: left;
+  transition: background .12s; }
+.rank-row:hover, .rank-row.hov { background: var(--accent-weak); }
+.rank-row.on { background: var(--accent-weak); box-shadow: inset 2px 0 0 var(--accent); }
+.rank-row.dim { opacity: 0.4; }
+.rr-rank { font-size: 11px; color: var(--ink3); font-weight: 700; text-align: center; }
+.rr-dot { width: 8px; height: 8px; border-radius: 50%; }
+.rr-name { font-size: 12.5px; font-weight: 600; }
+.rr-bar { height: 7px; background: #eef1f6; border-radius: 4px; overflow: hidden; }
+.rr-bar i { display: block; height: 100%; border-radius: 4px; }
+.rr-val { font-size: 12px; font-weight: 700; color: var(--ink2); text-align: right; font-variant-numeric: tabular-nums; }
+
+/* 연령구조 유형 범례 */
+.type-legend { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; margin: 2px 0 8px; font-size: 11.5px; color: var(--ink2); }
+.type-legend span { display: inline-flex; align-items: center; gap: 5px; }
+.type-legend i { width: 10px; height: 10px; border-radius: 3px; }
+
+/* recharts */
+.recharts-cartesian-grid line { stroke: #eef1f6; }
+.recharts-text, .recharts-cartesian-axis-tick-value { fill: var(--ink3) !important; font-size: 11px; }
+.recharts-default-tooltip { background: #fff !important; border: 1px solid var(--line) !important;
+  border-radius: 10px !important; box-shadow: var(--shadow-float) !important; }
+.recharts-tooltip-item { color: var(--ink2) !important; }
+
+@media (max-width: 1180px) {
+  .center { position: static; width: auto; }
+}

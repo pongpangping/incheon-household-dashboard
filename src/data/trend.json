@@ -1,0 +1,74 @@
+[
+  {
+    "month": "2025-01",
+    "population": 3008126,
+    "households": 1363616,
+    "avgHouseholdSize": 2.206
+  },
+  {
+    "month": "2025-02",
+    "population": 3012405,
+    "households": 1368017,
+    "avgHouseholdSize": 2.202
+  },
+  {
+    "month": "2025-03",
+    "population": 3016033,
+    "households": 1371566,
+    "avgHouseholdSize": 2.199
+  },
+  {
+    "month": "2025-04",
+    "population": 3018567,
+    "households": 1373735,
+    "avgHouseholdSize": 2.197
+  },
+  {
+    "month": "2025-05",
+    "population": 3021829,
+    "households": 1376055,
+    "avgHouseholdSize": 2.196
+  },
+  {
+    "month": "2025-06",
+    "population": 3024279,
+    "households": 1378060,
+    "avgHouseholdSize": 2.195
+  },
+  {
+    "month": "2025-07",
+    "population": 3026213,
+    "households": 1379617,
+    "avgHouseholdSize": 2.194
+  },
+  {
+    "month": "2025-08",
+    "population": 3028261,
+    "households": 1381674,
+    "avgHouseholdSize": 2.192
+  },
+  {
+    "month": "2025-09",
+    "population": 3031982,
+    "households": 1385215,
+    "avgHouseholdSize": 2.189
+  },
+  {
+    "month": "2025-10",
+    "population": 3034595,
+    "households": 1386872,
+    "avgHouseholdSize": 2.188
+  },
+  {
+    "month": "2025-11",
+    "population": 3035292,
+    "households": 1387527,
+    "avgHouseholdSize": 2.188
+  },
+  {
+    "month": "2025-12",
+    "population": 3036915,
+    "households": 1389090,
+    "avgHouseholdSize": 2.186
+  }
+]

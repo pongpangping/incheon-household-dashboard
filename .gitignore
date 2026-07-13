@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.vite/
+__pycache__/
+*.pyc
+.DS_Store
+.venv/
+# 원본(대용량) 경계 SHP — 재현은 extract.py 로. 산출물(incheonGeo.json)만 커밋
+data/raw/N3A_G0110000/
