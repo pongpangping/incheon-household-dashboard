@@ -25,19 +25,21 @@ export default function ScatterAgedOne({ rows, selected, hovered, onSelect, onHo
         X 1인가구 비율 · Y 고령(65+) 비중 · 원 크기 1인가구 수 · 십자선 = 인천 평균
       </div>
       <ResponsiveContainer width="100%" height={330}>
-        <ScatterChart margin={{ left: 6, right: 22, top: 14, bottom: 18 }}>
+        <ScatterChart margin={{ left: 4, right: 18, top: 12, bottom: 16 }}>
           <CartesianGrid strokeDasharray="2 4" />
           <XAxis type="number" dataKey="x" name="1인가구 비율" unit="%"
             domain={['dataMin - 2', 'dataMax + 2']} tickLine={false} axisLine={false}
-            label={{ value: '1인가구 비율(%) →', position: 'insideBottom', offset: -8,
-              fill: '#8a909c', fontSize: 11 }} />
+            tick={{ fontSize: 10, fill: '#9aa0ac' }}
+            label={{ value: '1인가구 비율(%) →', position: 'insideBottom', offset: -6,
+              fill: '#8a909c', fontSize: 10 }} />
           <YAxis type="number" dataKey="y" name="고령 비중" unit="%"
             domain={['dataMin - 3', 'dataMax + 4']} tickLine={false} axisLine={false}
+            tick={{ fontSize: 10, fill: '#9aa0ac' }}
             label={{ value: '고령 비중(%) →', angle: -90, position: 'insideLeft',
-              fill: '#8a909c', fontSize: 11 }} />
-          <ZAxis type="number" dataKey="z" range={[90, 620]} />
+              fill: '#8a909c', fontSize: 10 }} />
+          <ZAxis type="number" dataKey="z" range={[40, 260]} />
           <ReferenceLine x={ax} stroke="#CBD5E1" strokeDasharray="4 3"
-            label={{ value: '평균', position: 'top', fill: '#94A3B8', fontSize: 10 }} />
+            label={{ value: '평균', position: 'top', fill: '#94A3B8', fontSize: 9 }} />
           <ReferenceLine y={ay} stroke="#CBD5E1" strokeDasharray="4 3" />
           <Tooltip cursor={{ strokeDasharray: '3 3', stroke: 'rgba(20,30,60,0.25)' }}
             formatter={(v, n) => n === '1인가구 수' ? comma(v) : pct(v)} />
@@ -49,7 +51,7 @@ export default function ScatterAgedOne({ rows, selected, hovered, onSelect, onHo
                 stroke={d.code === selected ? '#B45309' : 'rgba(255,255,255,0.9)'}
                 strokeWidth={d.code === selected ? 2 : 1} cursor="pointer" />
             ))}
-            <LabelList dataKey="name" position="top" fill="#4b515e" fontSize={11} />
+            <LabelList dataKey="name" position="top" fill="#4b515e" fontSize={9} offset={6} />
           </Scatter>
         </ScatterChart>
       </ResponsiveContainer>
