@@ -1,31 +1,35 @@
 /* ============================================================
-   인천 1인가구 · 세대구조 대시보드 — AR6 스타일
-   깔끔한 흰색 플랫 카드 · 파란 액센트 · 헤더/사이드바/중앙카드/지도
+   인천 1인가구 · 세대구조 대시보드 — AR6 디자인 토큰 그대로
+   accent #33A8FF · 슬레이트 뉴트럴 · Pretendard
    ============================================================ */
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.css');
 :root {
-  --accent: #2a78d6;
-  --accent-strong: #1c5cab;
-  --accent-weak: #eaf1fc;
-  --ink: #1b1e26;
-  --ink2: #58616f;
-  --ink3: #98a1b2;
-  --line: #e9ecf3;
-  --line-strong: #dde1ea;
-  --surface: #ffffff;
-  --bg: #eef1f6;
-  --active: #17181d;
-  --radius: 14px;
-  --shadow-card: 0 2px 10px rgba(23,33,60,0.06), 0 1px 3px rgba(23,33,60,0.04);
-  --shadow-float: 0 8px 28px rgba(23,33,60,0.14);
-  --t-young: #2a78d6; --t-old: #eb6834; --t-bal: #8a909c;
-  --series-2: #1baf7a; --series-3: #eda100; --series-5: #4a3aa7; --series-6: #e34948; --good: #147a3e;
+  --accent: #33A8FF;
+  --accent-strong: #008AE0;
+  --accent-weak: #E6F3FF;
+  --ink: #0F172A;
+  --ink2: #475569;
+  --ink3: #94A3B8;
+  --line: #E2E8F0;
+  --line-strong: #CBD5E1;
+  --surface: #FFFFFF;
+  --bg: #F8FAFC;
+  --muted: #F1F5F9;
+  --panel: #E6F3FF;
+  --active: #1E293B;
+  --radius: 12px;
+  --shadow-card: 0 1px 2px rgba(15,23,42,0.05);
+  --shadow-md: 0 4px 6px -1px rgba(15,23,42,0.08), 0 2px 4px -2px rgba(15,23,42,0.04);
+  --shadow-float: 0 8px 24px rgba(15,23,42,0.12);
+  --t-young: #008AE0; --t-old: #FF8A00; --t-bal: #94A3B8;
+  --series-2: #1baf7a; --series-3: #eda100; --series-5: #A033FF; --series-6: #e34948; --good: #147a3e;
 }
 
 * { box-sizing: border-box; }
 html, body, #root { height: 100%; margin: 0; }
 body {
-  font-family: "Pretendard", system-ui, -apple-system, "Segoe UI", "Apple SD Gothic Neo",
-    "Malgun Gothic", sans-serif;
+  font-family: "Pretendard Variable", Pretendard, system-ui, -apple-system, "Segoe UI",
+    "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
   color: var(--ink); background: var(--bg); -webkit-font-smoothing: antialiased;
 }
 button { font-family: inherit; }
@@ -61,43 +65,65 @@ button { font-family: inherit; }
   background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
   box-shadow: var(--shadow-card); padding: 16px; display: flex; flex-direction: column; gap: 18px;
   overflow-y: auto; }
-.sb-badge { display: inline-flex; align-items: center; gap: 8px; }
-.sb-badge i { background: var(--accent); color: #fff; font-size: 11px; font-weight: 800; padding: 3px 7px;
-  border-radius: 6px; letter-spacing: 0.02em; }
+.sb-badge { display: inline-flex; align-items: center; gap: 9px; }
+.sb-badge i { background: var(--accent); color: #fff; font-size: 11px; font-weight: 800; padding: 4px 9px;
+  border-radius: 8px; letter-spacing: 0.02em; box-shadow: 0 1px 2px rgba(0,138,224,0.3); }
 .sb-badge span { font-size: 12px; color: var(--ink3); }
-.sb-sec-title { font-size: 12px; font-weight: 700; color: var(--ink2); margin-bottom: 9px; }
 
-/* 지표 리스트 (아코디언 서브아이템 느낌) */
-.metric-list { display: flex; flex-direction: column; gap: 4px; }
-.metric-item { display: flex; flex-direction: column; text-align: left; gap: 1px; border: 1px solid var(--line);
-  background: var(--surface); border-radius: 10px; padding: 9px 12px; cursor: pointer; transition: all .13s; }
-.metric-item:hover { border-color: var(--line-strong); background: #fafbfd; }
-.metric-item.active { background: var(--active); border-color: var(--active); }
-.metric-item.active .mi-name { color: #fff; }
-.metric-item.active .mi-desc { color: rgba(255,255,255,0.66); }
-.mi-name { font-size: 13.5px; font-weight: 650; color: var(--ink); }
-.mi-desc { font-size: 11px; color: var(--ink3); }
-
-/* 유형 필터 칩 */
-.type-chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.type-chips button { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600;
-  color: var(--ink2); background: var(--surface); border: 1px solid var(--line); border-radius: 999px;
-  padding: 5px 11px; cursor: pointer; transition: all .13s; }
-.type-chips button:hover { border-color: var(--line-strong); }
-.type-chips button.active { border-color: currentColor; background: var(--accent-weak); }
-.type-chips button i { width: 8px; height: 8px; border-radius: 50%; }
-.type-chips button:first-child i { display: none; }
-.type-chips button em { font-style: normal; font-size: 10.5px; color: var(--ink3); }
+/* AR6 아코디언 (활성 헤더 + 하위 항목) */
+.acc { border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-card); }
+.acc-head { display: flex; align-items: center; gap: 9px; background: var(--active); color: #fff;
+  padding: 12px 14px; }
+.acc-ic { font-size: 14px; }
+.acc-title { font-size: 13.5px; font-weight: 700; flex: 1; }
+.acc-minus { font-size: 16px; color: rgba(255,255,255,0.7); }
+.acc-body { background: var(--surface); padding: 6px; display: flex; flex-direction: column; gap: 2px; }
+.acc-item { display: flex; flex-direction: column; text-align: left; gap: 1px; border: 0; background: transparent;
+  border-radius: 8px; padding: 9px 10px 9px 14px; cursor: pointer; position: relative; transition: background .12s; }
+.acc-item:hover { background: var(--muted); }
+.acc-item.active { background: var(--accent-weak); }
+.acc-item.active::before { content: ''; position: absolute; left: 4px; top: 9px; bottom: 9px; width: 3px;
+  border-radius: 2px; background: var(--accent); }
+.acc-item.active .ai-name { color: var(--accent-strong); }
+.ai-name { font-size: 13px; font-weight: 650; color: var(--ink); }
+.ai-desc { font-size: 10.5px; color: var(--ink3); }
 
 /* 사이드바 범례 */
-.sb-legend { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 10.5px;
+.sb-legend { display: flex; align-items: center; gap: 8px; font-size: 10.5px;
   color: var(--ink2); font-variant-numeric: tabular-nums; }
 .sb-legend .lg-bar { flex: 1; height: 8px; border-radius: 5px;
-  background: linear-gradient(90deg,#e8f1fd,#9ec5f4,#3987e5,#1c5cab,#0d366b); }
+  background: linear-gradient(90deg,#E6F3FF,#9AD3FF,#33A8FF,#008AE0,#006BB0); }
+
+/* 데이터 선택 블록 */
+.sb-block { display: flex; flex-direction: column; gap: 10px; }
+.sb-label { font-size: 12px; font-weight: 700; color: var(--ink2); }
+.dd-sublabel { font-size: 11.5px; font-weight: 600; color: var(--ink3); margin-top: 2px; }
+
+/* 드롭다운 (AR6 형) */
+.dropdown { position: relative; display: flex; align-items: center; justify-content: space-between;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 0 12px;
+  height: 40px; cursor: pointer; }
+.dropdown:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-weak); }
+.dd-label { font-size: 12.5px; color: var(--ink2); }
+.dd-value { font-size: 13px; font-weight: 700; color: var(--ink); display: inline-flex; align-items: center; gap: 6px; }
+.dd-caret { color: var(--ink3); font-weight: 400; font-size: 15px; }
+.dropdown select { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+
+/* 세그먼트 토글 (버블/지역경계 형) */
+.seg-toggle { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg-toggle button { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600;
+  color: var(--ink2); background: var(--surface); border: 1px solid var(--line); border-radius: 9px;
+  padding: 7px 11px; cursor: pointer; transition: all .13s; }
+.seg-toggle button:hover { border-color: var(--line-strong); }
+.seg-toggle button.active { background: var(--accent-weak); border-color: var(--accent); }
+.seg-toggle button:first-child.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.seg-toggle button i { width: 8px; height: 8px; border-radius: 50%; }
+.seg-toggle button:first-child i { display: none; }
+.seg-toggle button em { font-style: normal; font-size: 10.5px; color: var(--ink3); }
 
 .sb-summary { margin-top: auto; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 7px;
   border-top: 1px solid var(--line); padding-top: 14px; }
-.sb-summary div { background: #f6f8fb; border-radius: 10px; padding: 8px; text-align: center; }
+.sb-summary div { background: var(--muted); border-radius: 10px; padding: 8px; text-align: center; }
 .sb-summary span { display: block; font-size: 10px; color: var(--ink3); }
 .sb-summary b { font-size: 15px; font-weight: 750; }
 
@@ -175,7 +201,7 @@ button { font-family: inherit; }
 .cmp-val { font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
 .cmp-diff { font-size: 11px; font-weight: 600; margin-left: 4px; }
 .cmp-track { position: relative; height: 9px; border-radius: 5px; background: #eef1f6; }
-.cmp-bar { height: 100%; border-radius: 5px; background: linear-gradient(90deg,#6da7ec,#2a78d6); transition: width .35s; }
+.cmp-bar { height: 100%; border-radius: 5px; background: linear-gradient(90deg,#66BCFF,#008AE0); transition: width .35s; }
 .cmp-avg { position: absolute; top: -3px; width: 2px; height: 15px; border-radius: 2px; background: var(--ink); transition: left .35s; }
 
 /* 순위 리스트 */

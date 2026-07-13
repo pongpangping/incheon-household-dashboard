@@ -29,7 +29,8 @@ export default function App() {
       <div className="body">
         <ChoroplethMap rows={sigungu} {...link} metricKey={metric} typeFilter={typeFilter} />
         <Sidebar rows={sigungu} summary={summary} metricKey={metric} onMetric={setMetric}
-          typeFilter={typeFilter} onTypeFilter={setTypeFilter} />
+          typeFilter={typeFilter} onTypeFilter={setTypeFilter}
+          selected={selected} onSelect={setSelected} />
         <CenterPanel rows={sigungu} summary={summary} trend={trend} link={link}
           metricKey={metric} typeFilter={typeFilter}
           selectedRow={selectedRow} rank={rank} total={ranked.length} />

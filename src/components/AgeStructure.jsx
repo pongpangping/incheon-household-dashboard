@@ -4,11 +4,11 @@ import {
 import { pct } from '../lib/format.js'
 
 const SEG = [
-  { key: 'youngOneShare', name: '청년(20~39)', color: '#2a78d6' },
-  { key: 'midOneShare', name: '중년(40~64)', color: '#1baf7a' },
-  { key: 'agedOneShareOfOne', name: '고령(65+)', color: '#eb6834' },
+  { key: 'youngOneShare', name: '청년(20~39)', color: '#33A8FF' },
+  { key: 'midOneShare', name: '중년(40~64)', color: '#94A3B8' },
+  { key: 'agedOneShareOfOne', name: '고령(65+)', color: '#FF8A00' },
 ]
-const TYPE_COLOR = { '청년형': '#2a78d6', '고령형': '#eb6834', '균형형': '#8a909c' }
+const TYPE_COLOR = { '청년형': '#008AE0', '고령형': '#FF8A00', '균형형': '#94A3B8' }
 
 export default function AgeStructure({ rows, selected, hovered, onSelect, onHover, typeFilter, bare }) {
   const data = [...rows]

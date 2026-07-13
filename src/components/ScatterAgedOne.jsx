@@ -13,9 +13,9 @@ export default function ScatterAgedOne({ rows, selected, hovered, onSelect, onHo
   const ay = summary.agedOneShareOfOne      // 인천 평균 고령 비중
 
   const fillFor = (code) => {
-    if (code === selected) return '#e34948'
-    if (code === hovered) return '#ea7a79'
-    return 'rgba(227,73,72,0.5)'
+    if (code === selected) return '#FF8A00'
+    if (code === hovered) return '#FFA94D'
+    return 'rgba(255,138,0,0.5)'
   }
 
   return (
@@ -38,9 +38,9 @@ export default function ScatterAgedOne({ rows, selected, hovered, onSelect, onHo
           <ZAxis type="number" dataKey="z" range={[90, 620]} />
           <ReferenceLine x={ax} stroke="#b7bdc9" strokeDasharray="4 3" />
           <ReferenceLine y={ay} stroke="#b7bdc9" strokeDasharray="4 3" />
-          <ReferenceArea x1={ax} y1={ay} x2={999} y2={999} fill="#eb6834" fillOpacity={0.06}
+          <ReferenceArea x1={ax} y1={ay} x2={999} y2={999} fill="#FF8A00" fillOpacity={0.07}
             label={{ value: '돌봄 우선(고령·1인 동반↑)', position: 'insideTopRight',
-              fill: '#c0562b', fontSize: 10.5, fontWeight: 600 }} />
+              fill: '#C2410C', fontSize: 10.5, fontWeight: 600 }} />
           <Tooltip cursor={{ strokeDasharray: '3 3', stroke: 'rgba(20,30,60,0.25)' }}
             formatter={(v, n) => n === '1인가구 수' ? comma(v) : pct(v)} />
           <Scatter data={data} isAnimationActive={false}
@@ -48,7 +48,7 @@ export default function ScatterAgedOne({ rows, selected, hovered, onSelect, onHo
             onMouseEnter={(d) => onHover?.(d.code)} onMouseLeave={() => onHover?.(null)}>
             {data.map((d) => (
               <Cell key={d.code} fill={fillFor(d.code)}
-                stroke={d.code === selected ? '#a11f1e' : 'rgba(255,255,255,0.9)'}
+                stroke={d.code === selected ? '#B45309' : 'rgba(255,255,255,0.9)'}
                 strokeWidth={d.code === selected ? 2 : 1} cursor="pointer" />
             ))}
             <LabelList dataKey="name" position="top" fill="#4b515e" fontSize={11} />

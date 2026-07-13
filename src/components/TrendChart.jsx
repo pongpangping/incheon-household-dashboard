@@ -30,11 +30,11 @@ export default function TrendChart({ trend, bare }) {
     <div className={bare ? 'chart-bare' : 'glass card'}>
       {!bare && <h2>세대수 · 세대당 인구 추이</h2>}
       <div className="card-sub">인천광역시 · 2025년 월별 (주민등록)</div>
-      <div style={{ fontSize: 12, color: '#2a78d6', fontWeight: 600, margin: '2px 0 -2px' }}>세대수</div>
-      <Mini data={data} dataKey="households" color="#2a78d6" unit="세대수"
+      <div style={{ fontSize: 12, color: '#008AE0', fontWeight: 600, margin: '2px 0 -2px' }}>세대수</div>
+      <Mini data={data} dataKey="households" color="#008AE0" unit="세대수"
         fmt={(v) => comma(v) + '세대'} ytick={(v) => `${(v / 10000).toFixed(0)}만`} />
-      <div style={{ fontSize: 12, color: '#0f8f63', fontWeight: 600, margin: '8px 0 -2px' }}>세대당 인구(명)</div>
-      <Mini data={data} dataKey="avg" color="#1baf7a" unit="세대당 인구"
+      <div style={{ fontSize: 12, color: '#FF8A00', fontWeight: 600, margin: '8px 0 -2px' }}>세대당 인구(명)</div>
+      <Mini data={data} dataKey="avg" color="#FF8A00" unit="세대당 인구"
         fmt={(v) => v + '명'} ytick={(v) => v.toFixed(2)} />
     </div>
   )

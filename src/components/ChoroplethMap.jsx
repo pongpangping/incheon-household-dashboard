@@ -5,8 +5,8 @@ import { metricBy } from '../lib/metrics.js'
 import { comma, pct } from '../lib/format.js'
 import rawGeo from '../data/incheonGeo.json'
 
-const SEQ = ['#e8f1fd', '#cde2fb', '#9ec5f4', '#6da7ec', '#3987e5', '#2a78d6', '#1c5cab', '#0d366b']
-const TYPE_COLOR = { '청년형': '#2a78d6', '고령형': '#eb6834', '균형형': '#8a909c' }
+const SEQ = ['#E6F3FF', '#C7E6FF', '#9AD3FF', '#66BCFF', '#33A8FF', '#0B93EE', '#008AE0', '#006BB0']
+const TYPE_COLOR = { '청년형': '#008AE0', '고령형': '#FF8A00', '균형형': '#94A3B8' }
 
 const okRing = (r) =>
   Array.isArray(r) && r.length >= 4 &&

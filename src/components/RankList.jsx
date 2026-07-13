@@ -1,7 +1,7 @@
 import { metricBy } from '../lib/metrics.js'
 
-const TYPE_COLOR = { '청년형': '#2a78d6', '고령형': '#eb6834', '균형형': '#8a909c' }
-const SEQ = ['#cde2fb', '#9ec5f4', '#3987e5', '#1c5cab', '#0d366b']
+const TYPE_COLOR = { '청년형': '#008AE0', '고령형': '#FF8A00', '균형형': '#94A3B8' }
+const SEQ = ['#C7E6FF', '#9AD3FF', '#33A8FF', '#008AE0', '#006BB0']
 
 export default function RankList({ rows, selected, hovered, onSelect, onHover, metricKey, typeFilter }) {
   const metric = metricBy(metricKey)

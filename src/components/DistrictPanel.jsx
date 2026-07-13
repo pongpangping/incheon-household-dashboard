@@ -1,7 +1,7 @@
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
 import { comma, pct } from '../lib/format.js'
 
-const DONUT = ['#2a78d6', '#1baf7a', '#eda100', '#4a3aa7'] // 1인/2인/3인/4인+
+const DONUT = ['#008AE0', '#33A8FF', '#FFA233', '#A033FF'] // 1인/2인/3인/4인+
 
 function CompareRow({ label, v, avg, unit }) {
   if (v == null || avg == null) return null
@@ -46,7 +46,7 @@ export default function DistrictPanel({ row, rank, total, summary }) {
         <span className="name">{row.name}</span>
         {row.oneType && (
           <span className="type-tag" style={{
-            background: { '청년형': '#2a78d6', '고령형': '#eb6834', '균형형': '#8a909c' }[row.oneType],
+            background: { '청년형': '#008AE0', '고령형': '#FF8A00', '균형형': '#94A3B8' }[row.oneType],
           }}>{row.oneType}</span>
         )}
         <span className="rank">1인가구 비율 인천 {rank}위 / {total}</span>
@@ -89,14 +89,14 @@ export default function DistrictPanel({ row, rank, total, summary }) {
 
       <div className="agemini-title">1인가구 연령구성</div>
       <div className="agemini">
-        <span className="am-seg" style={{ width: `${row.youngOneShare}%`, background: '#2a78d6' }} />
-        <span className="am-seg" style={{ width: `${row.midOneShare}%`, background: '#1baf7a' }} />
-        <span className="am-seg" style={{ width: `${row.agedOneShareOfOne}%`, background: '#eb6834' }} />
+        <span className="am-seg" style={{ width: `${row.youngOneShare}%`, background: '#33A8FF' }} />
+        <span className="am-seg" style={{ width: `${row.midOneShare}%`, background: '#94A3B8' }} />
+        <span className="am-seg" style={{ width: `${row.agedOneShareOfOne}%`, background: '#FF8A00' }} />
       </div>
       <div className="agemini-legend">
-        <span><i style={{ background: '#2a78d6' }} />청년 {pct(row.youngOneShare)}</span>
-        <span><i style={{ background: '#1baf7a' }} />중년 {pct(row.midOneShare)}</span>
-        <span><i style={{ background: '#eb6834' }} />고령 {pct(row.agedOneShareOfOne)}</span>
+        <span><i style={{ background: '#33A8FF' }} />청년 {pct(row.youngOneShare)}</span>
+        <span><i style={{ background: '#94A3B8' }} />중년 {pct(row.midOneShare)}</span>
+        <span><i style={{ background: '#FF8A00' }} />고령 {pct(row.agedOneShareOfOne)}</span>
       </div>
 
       <div className="cmp-title">인천 평균 대비 <span>(막대 위 선 = 인천 평균)</span></div>
