@@ -18,6 +18,7 @@ export default function App() {
   const [hovered, setHovered] = useState(null)
   const [metric, setMetric] = useState('onePersonRate')
   const [avgFilter, setAvgFilter] = useState(null)  // null | 'above' | 'below' (인천 평균 대비)
+  const [showGrid, setShowGrid] = useState(true)    // 격자 밀집도 히트맵(확대 시)
 
   const selectedRow = sigungu.find((r) => r.code === selected)
   const rank = ranked.findIndex((r) => r.code === selected) + 1
@@ -29,10 +30,11 @@ export default function App() {
       <Header summary={summary} />
       <div className="body">
         <ChoroplethMap rows={sigungu} {...link} metricKey={metric}
-          avgFilter={avgFilter} avgValue={avgValue} />
+          avgFilter={avgFilter} avgValue={avgValue} showGrid={showGrid} />
         <Sidebar rows={sigungu} summary={summary} metricKey={metric} onMetric={setMetric}
           avgFilter={avgFilter} onAvgFilter={setAvgFilter} avgValue={avgValue}
-          selected={selected} onSelect={setSelected} />
+          selected={selected} onSelect={setSelected}
+          showGrid={showGrid} onToggleGrid={setShowGrid} />
         <CenterPanel rows={sigungu} summary={summary} trend={trend} link={link}
           metricKey={metric} avgFilter={avgFilter} avgValue={avgValue}
           selectedRow={selectedRow} rank={rank} total={ranked.length} />

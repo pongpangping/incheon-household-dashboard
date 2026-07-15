@@ -3,6 +3,7 @@ import { pct } from '../lib/format.js'
 
 export default function Sidebar({
   rows, summary, metricKey, onMetric, avgFilter, onAvgFilter, avgValue, selected, onSelect,
+  showGrid, onToggleGrid,
 }) {
   const metric = metricBy(metricKey)
   const vals = rows.map((r) => r[metricKey]).filter((x) => x != null)
@@ -60,6 +61,16 @@ export default function Sidebar({
             onClick={() => onAvgFilter(avgFilter === 'below' ? null : 'below')}>
             평균 미만<em>{rows.length - nAbove}</em></button>
         </div>
+
+        {/* 격자 밀집도 토글 */}
+        <button className={`grid-toggle${showGrid ? ' on' : ''}`}
+          onClick={() => onToggleGrid(!showGrid)}>
+          <span className="gt-txt">
+            <b>격자 밀집도</b>
+            <em>구 확대 시 500m 격자로 1인가구 밀도 표시</em>
+          </span>
+          <span className="gt-sw"><i /></span>
+        </button>
       </div>
 
       <div className="sb-summary">

@@ -384,6 +384,148 @@ def build_geojson():
     return False
 
 
+# ── 격자(그리드) 밀집도 ────────────────────────────────────────────────
+# 우선순위:
+#   1) data/raw/grid/*.shp  (통계청 SGIS 격자 통계, EPSG:5179) 가 있으면 실제 값 사용
+#   2) 없으면 시군구 경계 + 1인가구 수로 '표본 격자' 생성 (sample=True 로 표기)
+# 출력: src/data/incheonGrid.json  { sample, unit, step, cells:[{v,geometry}] }
+
+def _grid_from_sgis(shp, code_geoms):
+    """SGIS 격자 SHP → 인천 영역 셀. 값 필드는 자동 탐지."""
+    import shapefile
+    from pyproj import CRS, Transformer
+    from shapely.geometry import shape as shp_shape, box
+
+    prj = shp.with_suffix(".prj")
+    src = CRS.from_wkt(prj.read_text()) if prj.exists() else CRS.from_epsg(5179)
+    tf = Transformer.from_crs(src, CRS.from_epsg(4326), always_xy=True)
+    try:
+        r = shapefile.Reader(str(shp), encoding="cp949")
+    except Exception:
+        r = shapefile.Reader(str(shp), encoding="latin1")
+    names = [f[0] for f in r.fields[1:]]
+    # 값 필드 후보: 이름에 가구/인구/1인/val/cnt/tot 등이 들어간 숫자형
+    key = None
+    for cand in names:
+        low = cand.lower()
+        if any(t in low for t in ("val", "cnt", "count", "tot", "가구", "인구", "1인", "num")):
+            key = cand
+            break
+    ki = names.index(key) if key else 0
+    # 인천 전체 경계로 합쳐 bbox 필터
+    from shapely.ops import unary_union
+    incheon = unary_union(list(code_geoms.values()))
+    minx, miny, maxx, maxy = incheon.bounds
+    cells = []
+    for sr in r.iterShapeRecords():
+        try:
+            v = float(re.sub(r"[^\d.]", "", str(sr.record[ki])) or 0)
+        except Exception:
+            v = 0
+        if v <= 0:
+            continue
+        geo = sr.shape.__geo_interface__
+        rings = geo["coordinates"] if geo["type"] == "Polygon" else geo["coordinates"][0]
+        pts = [tf.transform(x, y) for x, y in rings[0]]
+        xs = [p[0] for p in pts]; ys = [p[1] for p in pts]
+        cx, cy = sum(xs) / len(xs), sum(ys) / len(ys)
+        if not (minx <= cx <= maxx and miny <= cy <= maxy):
+            continue
+        if not incheon.contains(box(min(xs), min(ys), max(xs), max(ys)).centroid):
+            continue
+        cells.append({"v": round(v), "geometry": {
+            "type": "Polygon", "coordinates": [[[round(x, 6), round(y, 6)] for x, y in pts]]}})
+    return cells
+
+
+def _grid_sample(code_geoms, values, step=0.0055):
+    """시군구 경계 + 1인가구 수로 표본 격자 생성 (구별 합이 실제 1인가구 수에 근접)."""
+    import random
+    from shapely.geometry import Point, box
+    random.seed(28)
+    cells = []
+    for code, geom in code_geoms.items():
+        one = values.get(code) or 0
+        if one <= 0 or geom.is_empty:
+            continue
+        minx, miny, maxx, maxy = geom.bounds
+        cx, cy = (minx + maxx) / 2, (miny + maxy) / 2
+        # 셀 격자 위 후보 수집
+        cand, weights = [], []
+        gx = minx
+        i = 0
+        while gx < maxx:
+            gy = miny
+            j = 0
+            while gy < maxy:
+                center = Point(gx + step / 2, gy + step / 2)
+                if geom.contains(center):
+                    # 부드러운 공간장 + 중심부 가중 + 결정적 잡음
+                    field = 0.5 * (1 + math.sin(i * 0.6) * math.cos(j * 0.5)) \
+                        + 0.5 * (1 + math.sin((i + j) * 0.3))
+                    dist = math.hypot((center.x - cx), (center.y - cy))
+                    span = max(maxx - minx, maxy - miny) / 2 or 1
+                    core = max(0.15, 1 - (dist / span) * 0.8)
+                    w = (0.3 + field) * core * (0.85 + random.random() * 0.3)
+                    cand.append((gx, gy)); weights.append(w)
+                gy += step; j += 1
+            gx += step; i += 1
+        tot = sum(weights) or 1
+        for (gx, gy), w in zip(cand, weights):
+            v = round(one * w / tot)
+            if v <= 0:
+                continue
+            cells.append({"v": v, "geometry": {"type": "Polygon", "coordinates": [[
+                [round(gx, 6), round(gy, 6)], [round(gx + step, 6), round(gy, 6)],
+                [round(gx + step, 6), round(gy + step, 6)], [round(gx, 6), round(gy + step, 6)],
+                [round(gx, 6), round(gy, 6)]]]}})
+    return cells
+
+
+def build_grid(sigungu):
+    try:
+        import json as _json
+        from shapely.geometry import shape as shp_shape
+    except ImportError:
+        print("  [건너뜀] shapely 없음 → 격자 미생성")
+        return
+    geo_path = OUT / "incheonGeo.json"
+    if not geo_path.exists():
+        print("  [건너뜀] incheonGeo.json 없음 → 격자 미생성")
+        return
+    fc = json.loads(geo_path.read_text("utf-8"))
+    code_geoms = {}
+    for f in fc.get("features", []):
+        code = str(f["properties"].get("SIG_CD"))[:5]
+        try:
+            code_geoms[code] = shp_shape(f["geometry"]).buffer(0)
+        except Exception:
+            pass
+    values = {s["code"]: s.get("onePerson") for s in sigungu}
+
+    grid_dir = RAW / "grid"
+    shps = list(grid_dir.glob("*.shp")) if grid_dir.exists() else []
+    if shps:
+        try:
+            cells = _grid_from_sgis(shps[0], code_geoms)
+            sample, unit = False, "1인가구 수 / 셀"
+            print(f"  [정보] SGIS 격자 사용 — {shps[0].name} ({len(cells)}셀)")
+        except Exception as e:
+            print(f"  [경고] SGIS 격자 처리 실패({e}) → 표본 격자로 대체")
+            cells = _grid_sample(code_geoms, values); sample, unit = True, "추정 1인가구 수 / 셀(표본)"
+    else:
+        cells = _grid_sample(code_geoms, values)
+        sample, unit = True, "추정 1인가구 수 / 셀(표본)"
+        print(f"  [정보] 표본 격자 생성 — {len(cells)}셀 (data/raw/grid/*.shp 넣으면 실제값 사용)")
+
+    out = {"sample": sample, "unit": unit, "count": len(cells), "cells": cells}
+    (OUT / "incheonGrid.json").write_text(json.dumps(out, ensure_ascii=False), "utf-8")
+    pub = ROOT / "public" / "data"
+    pub.mkdir(parents=True, exist_ok=True)
+    (pub / "incheonGrid.json").write_text(json.dumps(out, ensure_ascii=False), "utf-8")
+    print(f"  [완료] src/data/incheonGrid.json ({len(cells)}셀, {'표본' if sample else '실제'})")
+
+
 def main():
     print("▶ 인천 1인가구·세대구조 데이터 추출")
     print("· KOSIS 가구 데이터…")
@@ -466,6 +608,8 @@ def main():
 
     print("· 경계 GeoJSON…")
     build_geojson()
+    print("· 격자 밀집도…")
+    build_grid(sigungu)
     print("✔ 완료")
 
 
