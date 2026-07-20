@@ -112,12 +112,6 @@ def parse_kosis():
         young, mid, aged = rec["young_one"], rec["mid_one"], rec["aged_one"]
         y_sh = round(young / one * 100, 1) if one else None
         o_sh = round(aged / one * 100, 1) if one else None
-        # 정책 유형: 청년형 / 고령형 / 균형형 (청년·고령 1인가구 비중 격차 기준)
-        if y_sh is not None and o_sh is not None:
-            gap = y_sh - o_sh
-            one_type = "청년형" if gap > 8 else "고령형" if gap < -8 else "균형형"
-        else:
-            one_type = None
         out[code] = {
             "code": code,
             "name": name,
@@ -132,7 +126,6 @@ def parse_kosis():
             "youngOneShare": y_sh,
             "midOneShare": round(mid / one * 100, 1) if one else None,
             "agedOneShareOfOne": o_sh,
-            "oneType": one_type,
         }
     return out
 
@@ -556,7 +549,6 @@ def main():
             "youngOneShare": k.get("youngOneShare"),
             "midOneShare": k.get("midOneShare"),
             "agedOneShareOfOne": k.get("agedOneShareOfOne"),
-            "oneType": k.get("oneType"),
             # 주민등록(최신월) 인구/세대
             "population": j.get("population"),
             "households": j.get("households"),

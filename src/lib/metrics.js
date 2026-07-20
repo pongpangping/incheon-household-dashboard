@@ -26,6 +26,15 @@ export const METRICS = [
     fmt: (v) => (v == null ? '—' : `${v}명`),
     desc: '주민등록 세대당 평균 인구 (2025)',
   },
+  {
+    key: 'composite',
+    label: '종합지수 (가중)',
+    short: '종합지수',
+    unit: '점',
+    fmt: (v) => (v == null ? '—' : `${Math.round(v)}점`),
+    desc: '여러 지표를 가중 합산 — 브라우저 실시간 계산',
+    computed: true,
+  },
 ]
 
 export const metricBy = (key) => METRICS.find((m) => m.key === key) ?? METRICS[0]

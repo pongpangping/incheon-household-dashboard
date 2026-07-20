@@ -3,11 +3,22 @@ import {
   CartesianGrid, Cell, LabelList, ReferenceLine, ReferenceArea,
 } from 'recharts'
 import { pct, comma } from '../lib/format.js'
+import { pearson, linreg, corrLabel } from '../lib/stats.js'
 
 export default function ScatterAgedOne({ rows, selected, hovered, onSelect, onHover, summary, bare }) {
   const data = rows
     .filter((r) => r.onePersonRate != null && r.agedOneShareOfOne != null)
     .map((r) => ({ x: r.onePersonRate, y: r.agedOneShareOfOne, z: r.onePerson, name: r.name, code: r.code }))
+
+  // 프론트 실시간 계산: 상관계수 + 최소제곱 회귀선
+  const xs = data.map((d) => d.x), ys = data.map((d) => d.y)
+  const r = pearson(xs, ys)
+  const fit = linreg(xs, ys)
+  const xMin = Math.min(...xs), xMax = Math.max(...xs)
+  const regSeg = fit ? [
+    { x: xMin, y: fit.slope * xMin + fit.intercept },
+    { x: xMax, y: fit.slope * xMax + fit.intercept },
+  ] : null
 
   const ax = summary.onePersonRate         // 인천 평균 1인가구 비율
   const ay = summary.agedOneShareOfOne      // 인천 평균 고령 비중
@@ -24,6 +35,12 @@ export default function ScatterAgedOne({ rows, selected, hovered, onSelect, onHo
       <div className="card-sub">
         X 1인가구 비율 · Y 고령(65+) 비중 · 원 크기 1인가구 수 · 십자선 = 인천 평균
       </div>
+      {r != null && (
+        <div className="corr-badge">
+          상관계수 <b>r = {r.toFixed(2)}</b> · {corrLabel(r)}
+          <span className="corr-reg">회귀선 y = {fit.slope.toFixed(2)}x + {fit.intercept.toFixed(1)}</span>
+        </div>
+      )}
       <ResponsiveContainer width="100%" height={330}>
         <ScatterChart margin={{ left: 4, right: 18, top: 12, bottom: 16 }}>
           <CartesianGrid strokeDasharray="2 4" />
@@ -41,6 +58,9 @@ export default function ScatterAgedOne({ rows, selected, hovered, onSelect, onHo
           <ReferenceLine x={ax} stroke="#CBD5E1" strokeDasharray="4 3"
             label={{ value: '평균', position: 'top', fill: '#94A3B8', fontSize: 9 }} />
           <ReferenceLine y={ay} stroke="#CBD5E1" strokeDasharray="4 3" />
+          {regSeg && <ReferenceLine ifOverflow="extendDomain" stroke="#0B6BB0" strokeWidth={1.6}
+            strokeDasharray="6 4" segment={regSeg}
+            label={{ value: '회귀선', position: 'insideTopRight', fill: '#0B6BB0', fontSize: 9 }} />}
           <Tooltip cursor={{ strokeDasharray: '3 3', stroke: 'rgba(20,30,60,0.25)' }}
             formatter={(v, n) => n === '1인가구 수' ? comma(v) : pct(v)} />
           <Scatter data={data} isAnimationActive={false}

@@ -95,10 +95,10 @@ export default function ChoroplethMap({ rows, selected, hovered, onSelect, onHov
       opacity: !matches && !gridActive ? 0.4 : 1,
     }
   }
-  const hoverCard = (row) => `
-    <div class="mtip-h"><b>${row.name}</b></div>
-    <div class="mtip-row"><span>${metric.label}</span><b>${metric.fmt(row[metric.key])}</b></div>
-    <div class="mtip-row"><span>인구 / 세대</span><b>${comma(row.population)} / ${comma(row.households)}</b></div>`
+  // 지도 위 상시 라벨 — 지역명 + 선택 지표값 (지도가 1차 정보면)
+  const labelHtml = (row) => `
+    <div class="dl-name">${row.name}</div>
+    <div class="dl-val">${metric.fmt(row[metric.key])}</div>`
   const popupCard = (row) => `
     <div class="mpop">
       <div class="mpop-h">${row.name}</div>
@@ -111,7 +111,7 @@ export default function ChoroplethMap({ rows, selected, hovered, onSelect, onHov
   const onEachFeature = (feature, layer) => {
     const row = byCode[codeOf(feature)]
     if (row) {
-      layer.bindTooltip(hoverCard(row), { sticky: true, direction: 'top', opacity: 1, className: 'm-tooltip' })
+      layer.bindTooltip(labelHtml(row), { permanent: true, direction: 'center', opacity: 1, className: 'district-label', interactive: false })
       layer.bindPopup(popupCard(row), { closeButton: true, className: 'm-popup', offset: [0, -4] })
     }
     layer.on({
@@ -126,7 +126,7 @@ export default function ChoroplethMap({ rows, selected, hovered, onSelect, onHov
     geoRef.current.setStyle(styleFor)
     geoRef.current.eachLayer((l) => {
       const row = byCode[codeOf(l.feature)]
-      if (row && l.getTooltip()) l.setTooltipContent(hoverCard(row))
+      if (row && l.getTooltip()) l.setTooltipContent(labelHtml(row))
       if (row && l.getPopup()) l.setPopupContent(popupCard(row))
     })
   })
@@ -176,7 +176,7 @@ export default function ChoroplethMap({ rows, selected, hovered, onSelect, onHov
   }
 
   return (
-    <div className="map-canvas">
+    <div className={`map-canvas${gridActive ? ' labels-off' : ''}`}>
       <MapContainer ref={setMap} center={[37.45, 126.55]} zoom={10} zoomControl={false}
         preferCanvas={true} scrollWheelZoom={true} style={{ height: '100%', width: '100%' }}>
         <TileLayer

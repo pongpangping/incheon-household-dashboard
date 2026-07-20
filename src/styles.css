@@ -65,6 +65,8 @@ button { font-family: inherit; }
   background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
   box-shadow: var(--shadow-card); padding: 16px; display: flex; flex-direction: column; gap: 18px;
   overflow-y: auto; }
+/* 아코디언 확장 시 자식이 줄어들며 잘리지 않도록 — 넘치면 사이드바가 스크롤 */
+.sidebar > * { flex: none; }
 .sb-badge { display: inline-flex; align-items: center; gap: 9px; }
 .sb-badge i { background: var(--accent); color: #fff; font-size: 11px; font-weight: 800; padding: 4px 9px;
   border-radius: 8px; letter-spacing: 0.02em; box-shadow: 0 1px 2px rgba(0,138,224,0.3); }
@@ -73,20 +75,24 @@ button { font-family: inherit; }
 /* AR6 아코디언 (활성 헤더 + 하위 항목) */
 .acc { border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-card); }
 .acc-head { display: flex; align-items: center; gap: 9px; background: var(--active); color: #fff;
-  padding: 12px 14px; }
+  padding: 12px 14px; width: 100%; border: 0; cursor: pointer; text-align: left; }
 .acc-ic { font-size: 14px; }
 .acc-title { font-size: 13.5px; font-weight: 700; flex: 1; }
-.acc-minus { font-size: 16px; color: rgba(255,255,255,0.7); }
+.acc-minus { font-size: 16px; color: rgba(255,255,255,0.85); width: 14px; text-align: center; }
 .acc-body { background: var(--surface); padding: 6px; display: flex; flex-direction: column; gap: 2px; }
-.acc-item { display: flex; flex-direction: column; text-align: left; gap: 1px; border: 0; background: transparent;
-  border-radius: 8px; padding: 9px 10px 9px 14px; cursor: pointer; position: relative; transition: background .12s; }
+.acc-item { position: relative; border-radius: 8px; transition: background .12s; }
 .acc-item:hover { background: var(--muted); }
 .acc-item.active { background: var(--accent-weak); }
 .acc-item.active::before { content: ''; position: absolute; left: 4px; top: 9px; bottom: 9px; width: 3px;
-  border-radius: 2px; background: var(--accent); }
+  border-radius: 2px; background: var(--accent); z-index: 1; }
+.ai-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%;
+  border: 0; background: transparent; text-align: left; cursor: pointer; padding: 9px 10px 9px 14px; border-radius: 8px; }
 .acc-item.active .ai-name { color: var(--accent-strong); }
 .ai-name { font-size: 13px; font-weight: 650; color: var(--ink); }
-.ai-desc { font-size: 10.5px; color: var(--ink3); }
+.ai-chev { font-size: 10px; color: var(--ink3); flex: none; }
+.acc-item.active .ai-chev { color: var(--accent-strong); }
+.ai-detail { padding: 0 12px 10px 14px; }
+.ai-desc { font-size: 10.5px; color: var(--ink3); line-height: 1.4; }
 
 /* 사이드바 범례 */
 .sb-legend { display: flex; align-items: center; gap: 8px; font-size: 10.5px;
@@ -120,6 +126,23 @@ button { font-family: inherit; }
 .seg-toggle button i { width: 8px; height: 8px; border-radius: 50%; }
 .seg-toggle button:first-child i { display: none; }
 .seg-toggle button em { font-style: normal; font-size: 10.5px; color: var(--ink3); }
+
+/* 가중 종합지수 슬라이더 (프론트 실시간 계산) */
+.wpanel { margin: 10px 0 4px; padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--muted); }
+.wpanel-h { font-size: 12.5px; font-weight: 700; color: var(--ink); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+.wpanel-h em { font-size: 9.5px; font-weight: 600; font-style: normal; color: #fff; background: #33A8FF; padding: 2px 6px; border-radius: 999px; }
+.wrow { margin-bottom: 9px; }
+.wrow-top { display: flex; justify-content: space-between; font-size: 11px; color: var(--ink2); margin-bottom: 2px; }
+.wrow-top b { color: #0B6BB0; font-size: 12px; }
+.wrow input[type=range] { width: 100%; accent-color: #0B6BB0; height: 16px; cursor: pointer; }
+.wpanel-note { font-size: 10px; color: var(--ink3); line-height: 1.4; margin-top: 4px; }
+
+/* 산점도 상관계수 배지 (프론트 실시간 계산) */
+.corr-badge { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: 2px 0 6px;
+  font-size: 11px; color: var(--ink2); background: #EAF3FB; border: 1px solid #CDE4F6;
+  border-radius: 8px; padding: 4px 9px; }
+.corr-badge b { color: #0B6BB0; font-size: 12.5px; }
+.corr-badge .corr-reg { color: var(--ink3); font-size: 10.5px; }
 
 .grid-toggle { display: flex; align-items: center; justify-content: space-between; gap: 10px;
   width: 100%; margin-top: 12px; padding: 10px 12px; border: 1px solid var(--line);
@@ -182,16 +205,15 @@ button { font-family: inherit; }
 .mpop { min-width: 190px; }
 .mpop-h { font-size: 14px; font-weight: 750; color: var(--ink); margin-bottom: 8px; }
 
-/* 지도 호버 카드 (툴팁) */
-.m-tooltip { background: var(--surface) !important; border: 1px solid var(--line) !important;
-  border-radius: 11px !important; box-shadow: var(--shadow-float) !important; color: var(--ink) !important;
-  font: inherit !important; padding: 9px 12px !important; }
-.leaflet-tooltip-top.m-tooltip::before { border-top-color: var(--surface) !important; }
-.mtip-h { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; }
-.mtip-h b { font-size: 13.5px; }
-.mtip-type { font-size: 10px; font-weight: 700; color: #fff; padding: 2px 6px; border-radius: 999px; }
-.mtip-row { display: flex; justify-content: space-between; gap: 16px; font-size: 11.5px; color: var(--ink2); }
-.mtip-row b { color: var(--ink); }
+/* 지도 위 상시 라벨 — 지역명 + 지표값 (지도를 1차 정보면으로) */
+.district-label { background: transparent !important; border: 0 !important; box-shadow: none !important;
+  padding: 0 !important; white-space: nowrap; pointer-events: none; }
+.district-label::before { display: none !important; }   /* 툴팁 화살표 제거 */
+.district-label .dl-name { font-size: 10.5px; font-weight: 600; color: #0f2c4c; text-align: center;
+  line-height: 1.05; text-shadow: 0 0 3px #fff, 0 1px 2px #fff, 0 0 6px #fff; }
+.district-label .dl-val { font-size: 12.5px; font-weight: 800; color: #084d78; text-align: center;
+  line-height: 1.1; text-shadow: 0 0 3px #fff, 0 1px 2px #fff, 0 0 6px #fff; }
+.labels-off .district-label { display: none; }          /* 확대(격자) 시 숨김 */
 
 /* ── 공용 컴포넌트(카드 내부) ───────────────────────── */
 .chart-bare { width: 100%; }
