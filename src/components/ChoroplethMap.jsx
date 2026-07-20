@@ -29,6 +29,44 @@ function cleanGeometry(g) {
 const codeOf = (f) =>
   String(f.properties?.SIG_CD ?? f.properties?.sig_cd ?? f.properties?.code ?? '').slice(0, 5)
 
+// 라벨 위치: 가장 큰 폴리곤의 무게중심(면적 가중) → 바다·구석에 찍히지 않게
+function ringCentroid(ring) {
+  let a = 0, cx = 0, cy = 0
+  for (let i = 0; i < ring.length - 1; i++) {
+    const [x0, y0] = ring[i], [x1, y1] = ring[i + 1]
+    const f = x0 * y1 - x1 * y0
+    a += f; cx += (x0 + x1) * f; cy += (y0 + y1) * f
+  }
+  a *= 0.5
+  if (Math.abs(a) < 1e-12) {
+    const m = ring.reduce((s, p) => [s[0] + p[0], s[1] + p[1]], [0, 0])
+    return [m[0] / ring.length, m[1] / ring.length]
+  }
+  return [cx / (6 * a), cy / (6 * a)]  // [lng, lat]
+}
+function ringArea(ring) {
+  let a = 0
+  for (let i = 0; i < ring.length - 1; i++) {
+    const [x0, y0] = ring[i], [x1, y1] = ring[i + 1]
+    a += x0 * y1 - x1 * y0
+  }
+  return Math.abs(a / 2)
+}
+function labelAnchor(geom) {
+  if (!geom) return null
+  const polys = geom.type === 'Polygon' ? [geom.coordinates] : geom.coordinates
+  let best = null, bestA = -1
+  for (const poly of polys) {
+    const ring = poly && poly[0]
+    if (!ring || ring.length < 4) continue
+    const a = ringArea(ring)
+    if (a > bestA) { bestA = a; best = ring }
+  }
+  if (!best) return null
+  const [lng, lat] = ringCentroid(best)
+  return [lat, lng]  // Leaflet 순서
+}
+
 export default function ChoroplethMap({ rows, selected, hovered, onSelect, onHover, metricKey, avgFilter, avgValue, showGrid }) {
   const geoRef = useRef(null)
   const [map, setMap] = useState(null)
@@ -45,6 +83,11 @@ export default function ChoroplethMap({ rows, selected, hovered, onSelect, onHov
 
   const metric = metricBy(metricKey)
   const byCode = useMemo(() => Object.fromEntries(rows.map((r) => [r.code, r])), [rows])
+  const anchorByCode = useMemo(() => {
+    const m = {}
+    for (const f of (geo?.features || [])) { const a = labelAnchor(f.geometry); if (a) m[codeOf(f)] = a }
+    return m
+  }, [geo])
   const [min, max] = useMemo(() => {
     const v = rows.map((r) => r[metric.key]).filter((x) => x != null)
     return [Math.min(...v), Math.max(...v)]
@@ -130,6 +173,16 @@ export default function ChoroplethMap({ rows, selected, hovered, onSelect, onHov
       if (row && l.getPopup()) l.setPopupContent(popupCard(row))
     })
   })
+
+  // 라벨을 대표 지점(가장 큰 폴리곤 중심)으로 이동 — 연수구·옹진군이 바다/구석에 찍히지 않게
+  useEffect(() => {
+    if (!map || !geoRef.current) return
+    geoRef.current.eachLayer((l) => {
+      const a = anchorByCode[codeOf(l.feature)]
+      const tt = l.getTooltip && l.getTooltip()
+      if (a && tt) tt.setLatLng(a)
+    })
+  }, [map, anchorByCode])
 
   const firstRef = useRef(true)
   useEffect(() => {

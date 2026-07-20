@@ -61,7 +61,7 @@ button { font-family: inherit; }
 .map-empty code { background: #eef1f6; padding: 3px 8px; border-radius: 6px; }
 
 /* ── 사이드바 ───────────────────────────────────────── */
-.sidebar { position: absolute; top: 14px; left: 14px; bottom: 14px; width: 246px; z-index: 20;
+.sidebar { position: absolute; top: 14px; left: 14px; bottom: 14px; width: 292px; z-index: 20;
   background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
   box-shadow: var(--shadow-card); padding: 16px; display: flex; flex-direction: column; gap: 18px;
   overflow-y: auto; }
@@ -88,7 +88,7 @@ button { font-family: inherit; }
 .ai-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%;
   border: 0; background: transparent; text-align: left; cursor: pointer; padding: 9px 10px 9px 14px; border-radius: 8px; }
 .acc-item.active .ai-name { color: var(--accent-strong); }
-.ai-name { font-size: 13px; font-weight: 650; color: var(--ink); }
+.ai-name { font-size: 13px; font-weight: 650; color: var(--ink); white-space: nowrap; }
 .ai-chev { font-size: 10px; color: var(--ink3); flex: none; }
 .acc-item.active .ai-chev { color: var(--accent-strong); }
 .ai-detail { padding: 0 12px 10px 14px; }
@@ -129,8 +129,11 @@ button { font-family: inherit; }
 
 /* 가중 종합지수 슬라이더 (프론트 실시간 계산) */
 .wpanel { margin: 10px 0 4px; padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--muted); }
-.wpanel-h { font-size: 12.5px; font-weight: 700; color: var(--ink); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
-.wpanel-h em { font-size: 9.5px; font-weight: 600; font-style: normal; color: #fff; background: #33A8FF; padding: 2px 6px; border-radius: 999px; }
+.wpanel-h { font-size: 12.5px; font-weight: 700; color: var(--ink); margin-bottom: 10px; display: flex;
+  align-items: center; gap: 6px; flex-wrap: wrap; }
+.wpanel-h .wpanel-t { white-space: nowrap; }
+.wpanel-h em { font-size: 9.5px; font-weight: 600; font-style: normal; color: #fff; background: #33A8FF;
+  padding: 2px 6px; border-radius: 999px; white-space: nowrap; }
 .wrow { margin-bottom: 9px; }
 .wrow-top { display: flex; justify-content: space-between; font-size: 11px; color: var(--ink2); margin-bottom: 2px; }
 .wrow-top b { color: #0B6BB0; font-size: 12px; }
@@ -165,7 +168,7 @@ button { font-family: inherit; }
 .sb-summary b { font-size: 15px; font-weight: 750; }
 
 /* ── 중앙 차트 카드 열 ──────────────────────────────── */
-.center { position: absolute; top: 14px; left: 274px; bottom: 14px; width: 348px; z-index: 20;
+.center { position: absolute; top: 14px; left: 320px; bottom: 14px; width: 350px; z-index: 20;
   display: flex; flex-direction: column; gap: 12px; overflow-y: auto; padding-right: 2px; }
 .breadcrumb { background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
   box-shadow: var(--shadow-card); padding: 12px 15px; font-size: 12.5px; color: var(--ink3); flex: none; }

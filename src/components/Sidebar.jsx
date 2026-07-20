@@ -48,7 +48,7 @@ export default function Sidebar({
                       <div className="ai-desc">{m.desc}</div>
                       {m.key === 'composite' && (
                         <div className="wpanel">
-                          <div className="wpanel-h">가중치 조절 <em>브라우저 실시간 계산</em></div>
+                          <div className="wpanel-h"><span className="wpanel-t">가중치 조절</span><em>브라우저 실시간 계산</em></div>
                           {COMPOSITE_INDICATORS.map((ind) => (
                             <div className="wrow" key={ind.key}>
                               <div className="wrow-top">
