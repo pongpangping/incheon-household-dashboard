@@ -15,7 +15,9 @@ export default function App() {
   const [metric, setMetric] = useState('onePersonRate')
   const [avgFilter, setAvgFilter] = useState(null)  // null | 'above' | 'below' (인천 평균 대비)
   const [showGrid, setShowGrid] = useState(true)    // 격자 밀집도 히트맵(확대 시)
+  const [panelOpen, setPanelOpen] = useState(true)  // 중앙 상세 패널 접기
   const [weights, setWeights] = useState({ onePersonRate: 1, agedOneShareOfOne: 1, avgHouseholdSize: 1 })
+  const leftInset = panelOpen ? 690 : 330           // 지도가 패널 뒤로 숨지 않게 보정할 좌측 폭
 
   // 프론트 실시간 계산: 가중치가 바뀌면 브라우저가 종합지수를 다시 계산
   const rows = useMemo(() => computeComposite(sigungu, weights), [weights])
@@ -40,7 +42,7 @@ export default function App() {
       <Header summary={summary} />
       <div className="body">
         <ChoroplethMap rows={rows} {...link} metricKey={metric}
-          avgFilter={avgFilter} avgValue={avgValue} showGrid={showGrid} />
+          avgFilter={avgFilter} avgValue={avgValue} showGrid={showGrid} leftInset={leftInset} />
         <Sidebar rows={rows} summary={summary} metricKey={metric} onMetric={setMetric}
           avgFilter={avgFilter} onAvgFilter={setAvgFilter} avgValue={avgValue}
           selected={sel} onSelect={setSelected}
@@ -48,7 +50,8 @@ export default function App() {
           weights={weights} onWeights={setWeights} />
         <CenterPanel rows={rows} summary={summary} trend={trend} link={link}
           metricKey={metric} avgFilter={avgFilter} avgValue={avgValue}
-          selectedRow={selectedRow} rank={rank} total={ranked.length} />
+          selectedRow={selectedRow} rank={rank} total={ranked.length}
+          open={panelOpen} onToggle={() => setPanelOpen((o) => !o)} />
       </div>
     </div>
   )

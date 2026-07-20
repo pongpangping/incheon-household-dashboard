@@ -67,10 +67,15 @@ function labelAnchor(geom) {
   return [lat, lng]  // Leaflet 순서
 }
 
-export default function ChoroplethMap({ rows, selected, hovered, onSelect, onHover, metricKey, avgFilter, avgValue, showGrid }) {
+export default function ChoroplethMap({ rows, selected, hovered, onSelect, onHover, metricKey, avgFilter, avgValue, showGrid, leftInset = 690 }) {
   const geoRef = useRef(null)
+  const mapRef = useRef(null)
   const [map, setMap] = useState(null)
   const [zoom, setZoom] = useState(10)
+  // 좌측 패널이 가리는 폭 — 확대·개요 시 지도가 패널 뒤로 숨지 않도록 여백으로 보정
+  const leftInsetRef = useRef(leftInset)
+  leftInsetRef.current = leftInset
+  const viewOpts = () => ({ paddingTopLeft: [leftInsetRef.current, 44], paddingBottomRight: [40, 40] })
 
   const { geo, status } = useMemo(() => {
     const features = ((rawGeo && rawGeo.features) || [])
@@ -158,7 +163,13 @@ export default function ChoroplethMap({ rows, selected, hovered, onSelect, onHov
       layer.bindPopup(popupCard(row), { closeButton: true, className: 'm-popup', offset: [0, -4] })
     }
     layer.on({
-      click: () => onSelect(codeOf(feature)),
+      // 지도 객체를 직접 클릭했을 때만 확대(줌) + 팝업 — 패널 선택은 강조만
+      click: () => {
+        onSelect(codeOf(feature))
+        const m = mapRef.current
+        try { m && m.flyToBounds(layer.getBounds(), { ...viewOpts(), maxZoom: 12, duration: 0.7 }) } catch (e) { /* noop */ }
+        layer.openPopup()
+      },
       mouseover: () => onHover?.(codeOf(feature)),
       mouseout: () => onHover?.(null),
     })
@@ -184,21 +195,13 @@ export default function ChoroplethMap({ rows, selected, hovered, onSelect, onHov
     })
   }, [map, anchorByCode])
 
+  // 초기 1회: 인천 전체 개요를 (패널을 피해) 우측 지도 영역 중앙에 맞춤. 선택만으론 줌하지 않음.
   const firstRef = useRef(true)
   useEffect(() => {
-    if (!map || !geoRef.current) return
-    if (firstRef.current) {   // 초기: 인천 전체 개요 (범례 표시)
-      firstRef.current = false
-      try { map.fitBounds(geoRef.current.getBounds(), { padding: [30, 30] }) } catch (e) { /* noop */ }
-      return
-    }
-    let target
-    geoRef.current.eachLayer((l) => { if (codeOf(l.feature) === selected) target = l })
-    if (target) {
-      map.flyToBounds(target.getBounds(), { maxZoom: 12, padding: [40, 40], duration: 0.7 })
-      target.openPopup()
-    }
-  }, [selected, map])
+    if (!map || !geoRef.current || !firstRef.current) return
+    firstRef.current = false
+    try { map.fitBounds(geoRef.current.getBounds(), viewOpts()) } catch (e) { /* noop */ }
+  }, [map])
 
   // 줌 레벨 추적 → 범례는 축소(개요) 상태에서만 표시
   useEffect(() => {
@@ -230,7 +233,7 @@ export default function ChoroplethMap({ rows, selected, hovered, onSelect, onHov
 
   return (
     <div className={`map-canvas${gridActive ? ' labels-off' : ''}`}>
-      <MapContainer ref={setMap} center={[37.45, 126.55]} zoom={10} zoomControl={false}
+      <MapContainer ref={(m) => { setMap(m); mapRef.current = m }} center={[37.45, 126.55]} zoom={10} zoomControl={false}
         preferCanvas={true} scrollWheelZoom={true} style={{ height: '100%', width: '100%' }}>
         <TileLayer
           url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"

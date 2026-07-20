@@ -28,11 +28,12 @@ export const METRICS = [
   },
   {
     key: 'composite',
-    label: '종합지수 (가중)',
-    short: '종합지수',
+    label: '1인가구 집중지수',
+    short: '집중지수',
     unit: '점',
     fmt: (v) => (v == null ? '—' : `${Math.round(v)}점`),
-    desc: '여러 지표를 가중 합산 — 브라우저 실시간 계산',
+    // 방향 정의: 높을수록 1인·고령 가구가 많고 세대 규모가 작음 = 집중·정책관심 방향
+    desc: '높을수록 1인·고령·소규모 가구 집중 — 브라우저 실시간 계산',
     computed: true,
   },
 ]
