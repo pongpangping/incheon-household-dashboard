@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { METRICS, metricBy } from '../lib/metrics.js'
-import { pct } from '../lib/format.js'
+import { pct, downloadCsv } from '../lib/format.js'
 import { COMPOSITE_INDICATORS } from '../lib/stats.js'
 
 export default function Sidebar({
@@ -114,6 +114,7 @@ export default function Sidebar({
           </select>
         </label>
         <div className="sb-hint">고른 지역이 오른쪽 상세·순위·차트에 반영됩니다. 지도를 직접 클릭하면 그 지역으로 확대돼요.</div>
+        <button className="csv-btn" onClick={() => downloadCsv(rows)}>⤓ 표 내보내기 (CSV)</button>
       </div>
 
       <div className="sb-summary">

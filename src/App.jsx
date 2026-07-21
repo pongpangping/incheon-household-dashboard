@@ -50,7 +50,7 @@ export default function App() {
           weights={weights} onWeights={setWeights} />
         <CenterPanel rows={rows} summary={summary} trend={trend} link={link}
           metricKey={metric} avgFilter={avgFilter} avgValue={avgValue}
-          selectedRow={selectedRow} rank={rank} total={ranked.length}
+          selectedRow={selectedRow} rank={rank} total={ranked.length} weights={weights}
           open={panelOpen} onToggle={() => setPanelOpen((o) => !o)} />
       </div>
     </div>

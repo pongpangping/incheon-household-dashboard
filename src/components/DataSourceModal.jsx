@@ -71,6 +71,14 @@ export default function DataSourceModal() {
                   {s.note && <div className="src-note">※ {s.note}</div>}
                 </div>
               ))}
+
+              <div className="methods">
+                <div className="methods-h">지표 정의 · 산식</div>
+                <div className="mrow"><b>1인가구 비율</b> = 1인가구 ÷ 일반가구 × 100 <em>(KOSIS·2023)</em></div>
+                <div className="mrow"><b>고령 1인가구 비중</b> = 가구주 65세 이상 1인가구 ÷ 1인가구 × 100</div>
+                <div className="mrow"><b>세대당 인구</b> = 인구 ÷ 세대수 <em>(주민등록·2025)</em></div>
+                <div className="mrow"><b>1인가구 집중지수</b> = 세 지표를 min-max 정규화(세대당 인구는 역방향) 후 가중 평균 × 100. 높을수록 1인·고령·소규모 가구 집중.</div>
+              </div>
             </div>
 
             <div className="modal-foot">

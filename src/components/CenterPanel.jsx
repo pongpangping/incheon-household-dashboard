@@ -17,7 +17,7 @@ function Card({ n, title, children }) {
   )
 }
 
-export default function CenterPanel({ rows, summary, trend, link, metricKey, avgFilter, avgValue, selectedRow, rank, total, open = true, onToggle }) {
+export default function CenterPanel({ rows, summary, trend, link, metricKey, avgFilter, avgValue, selectedRow, rank, total, weights, open = true, onToggle }) {
   const metric = metricBy(metricKey)
   const filterLabel = avgFilter === 'above' ? '평균 이상' : avgFilter === 'below' ? '평균 미만' : null
 
@@ -38,7 +38,7 @@ export default function CenterPanel({ rows, summary, trend, link, metricKey, avg
       </div>
 
       <Card n="1" title="선택 시군구 상세">
-        <DistrictPanel row={selectedRow} rank={rank} total={total} summary={summary} />
+        <DistrictPanel row={selectedRow} rank={rank} total={total} summary={summary} rows={rows} weights={weights} />
       </Card>
 
       <Card n="2" title={`시군구 순위 · ${metric.label}`}>
@@ -49,7 +49,7 @@ export default function CenterPanel({ rows, summary, trend, link, metricKey, avg
         <AgeStructure rows={rows} {...link} bare />
       </Card>
 
-      <Card n="4" title="1인가구 비율 × 고령 비중">
+      <Card n="4" title="1인가구 유형 (평균 대비)">
         <ScatterAgedOne rows={rows} {...link} summary={summary} bare />
       </Card>
 

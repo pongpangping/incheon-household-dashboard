@@ -50,6 +50,28 @@ export const COMPOSITE_INDICATORS = [
   { key: 'avgHouseholdSize', label: '세대당 인구', invert: true },
 ]
 
+// 선택 구의 집중지수를 지표별 기여도로 분해 (블랙박스가 아니게)
+export function compositeBreakdown(rows, row, weights) {
+  if (!row) return null
+  const range = {}
+  for (const ind of COMPOSITE_INDICATORS) {
+    const vals = rows.map((r) => r[ind.key]).filter((v) => v != null)
+    range[ind.key] = { min: Math.min(...vals), max: Math.max(...vals) }
+  }
+  const wSum = COMPOSITE_INDICATORS.reduce((a, ind) => a + (weights[ind.key] || 0), 0)
+  const parts = COMPOSITE_INDICATORS.map((ind) => {
+    const w = weights[ind.key] || 0
+    const { min, max } = range[ind.key]
+    const v = row[ind.key]
+    let norm = max === min || v == null ? 0.5 : (v - min) / (max - min)
+    if (ind.invert) norm = 1 - norm
+    const contrib = wSum ? (w * norm / wSum) * 100 : 0
+    return { key: ind.key, label: ind.label, invert: ind.invert, weight: w, contrib: Math.round(contrib * 10) / 10 }
+  })
+  const total = Math.round(parts.reduce((a, p) => a + p.contrib, 0))
+  return { parts, total }
+}
+
 export function computeComposite(rows, weights) {
   // 지표별 min/max
   const range = {}

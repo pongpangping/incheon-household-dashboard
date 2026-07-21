@@ -1,7 +1,9 @@
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
 import { comma, pct } from '../lib/format.js'
+import { compositeBreakdown } from '../lib/stats.js'
 
 const DONUT = ['#008AE0', '#33A8FF', '#FFA233', '#A033FF'] // 1인/2인/3인/4인+
+const CONTRIB = { onePersonRate: '#0B93EE', agedOneShareOfOne: '#F5760D', avgHouseholdSize: '#64748B' }
 
 function Tile({ label, value, unit, delta, deltaUnit }) {
   const up = delta > 0
@@ -17,7 +19,7 @@ function Tile({ label, value, unit, delta, deltaUnit }) {
   )
 }
 
-export default function DistrictPanel({ row, rank, total, summary }) {
+export default function DistrictPanel({ row, rank, total, summary, rows, weights }) {
   if (!row) return null
   const donut = [
     { name: '1인', value: row.onePerson },
@@ -25,6 +27,7 @@ export default function DistrictPanel({ row, rank, total, summary }) {
     { name: '3인', value: row.threePerson },
     { name: '4인+', value: row.fourPlusPerson },
   ].filter((d) => d.value != null)
+  const bd = rows && weights ? compositeBreakdown(rows, row, weights) : null
 
   return (
     <>
@@ -76,6 +79,22 @@ export default function DistrictPanel({ row, rank, total, summary }) {
         <span><i style={{ background: '#94A3B8' }} />중년 {pct(row.midOneShare)}</span>
         <span><i style={{ background: '#FF8A00' }} />고령 {pct(row.agedOneShareOfOne)}</span>
       </div>
+
+      {bd && (
+        <>
+          <div className="dp-sub">1인가구 집중지수 <b className="dp-score">{bd.total}점</b> <span className="dp-sub-hint">지표별 기여</span></div>
+          <div className="agemini">
+            {bd.parts.map((p) => (
+              <span key={p.key} className="am-seg" style={{ width: `${p.contrib}%`, background: CONTRIB[p.key] }} />
+            ))}
+          </div>
+          <div className="agemini-legend">
+            {bd.parts.map((p) => (
+              <span key={p.key}><i style={{ background: CONTRIB[p.key] }} />{p.label}{p.invert ? '↓' : ''} {p.contrib}점</span>
+            ))}
+          </div>
+        </>
+      )}
 
       <div className="dp-foot">인구 <b>{comma(row.population)}</b>명 · 세대 <b>{comma(row.households)}</b>세대 (주민등록 2025)</div>
     </>

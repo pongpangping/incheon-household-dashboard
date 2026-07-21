@@ -72,6 +72,8 @@ export default function ChoroplethMap({ rows, selected, hovered, onSelect, onHov
   const mapRef = useRef(null)
   const [map, setMap] = useState(null)
   const [zoom, setZoom] = useState(10)
+  const [tilesReady, setTilesReady] = useState(false)   // 타일 로딩 상태 (회색 깜빡임 방지)
+  const [tip, setTip] = useState(true)                  // 첫 진입 사용법 힌트
   // 좌측 패널이 가리는 폭 — 확대·개요 시 지도가 패널 뒤로 숨지 않도록 여백으로 보정
   const leftInsetRef = useRef(leftInset)
   leftInsetRef.current = leftInset
@@ -236,13 +238,24 @@ export default function ChoroplethMap({ rows, selected, hovered, onSelect, onHov
         preferCanvas={true} scrollWheelZoom={true} style={{ height: '100%', width: '100%' }}>
         <TileLayer
           url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-          attribution='&copy; OpenStreetMap &copy; CARTO' subdomains="abcd" maxZoom={19} />
+          attribution='&copy; OpenStreetMap &copy; CARTO' subdomains="abcd" maxZoom={19}
+          eventHandlers={{ load: () => setTilesReady(true) }} />
         {geo && <GeoJSON ref={geoRef} data={geo} style={styleFor} onEachFeature={onEachFeature} />}
         {gridActive && (
           <GeoJSON key="grid" data={gridGeo} style={gridStyle} interactive={false} />
         )}
         <ZoomControl position="topright" />
       </MapContainer>
+
+      {!tilesReady && (
+        <div className="map-loading"><span className="spin" />지도 불러오는 중…</div>
+      )}
+      {tip && (
+        <div className="map-tip" style={{ left: `calc(50% + ${leftInset / 2}px)` }}>
+          <b>지도의 구를 클릭</b>하면 확대·상세가 열립니다 · 패널에서 고르면 강조만 됩니다
+          <button onClick={() => setTip(false)} aria-label="닫기">✕</button>
+        </div>
+      )}
 
       {!gridActive && (
         <div className="maplegend">
