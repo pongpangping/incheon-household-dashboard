@@ -48,22 +48,6 @@ export default function Sidebar({
                     {isOpen && (
                       <div className="ai-detail">
                         <div className="ai-desc">{m.desc}</div>
-                        {m.key === 'composite' && (
-                          <div className="wpanel">
-                            <div className="wpanel-h"><span className="wpanel-t">가중치 조절</span><em>브라우저 실시간 계산</em></div>
-                            {COMPOSITE_INDICATORS.map((ind) => (
-                              <div className="wrow" key={ind.key}>
-                                <div className="wrow-top">
-                                  <span>{ind.label}{ind.invert ? ' (작을수록↑)' : ''}</span>
-                                  <b>{weights[ind.key]}</b>
-                                </div>
-                                <input type="range" min="0" max="3" step="1" value={weights[ind.key]}
-                                  onChange={(e) => onWeights({ ...weights, [ind.key]: Number(e.target.value) })} />
-                              </div>
-                            ))}
-                            <div className="wpanel-note">높을수록 1인·고령·소규모 가구 집중. 정규화(min-max) 후 가중 평균 → 0~100점.</div>
-                          </div>
-                        )}
                       </div>
                     )}
                   </div>
@@ -72,6 +56,24 @@ export default function Sidebar({
             </div>
           )}
         </div>
+
+        {/* 집중지수 가중치 — 지표 선택 박스와 분리해 아래 별도 패널로 */}
+        {metricKey === 'composite' && (
+          <div className="wpanel">
+            <div className="wpanel-h"><span className="wpanel-t">집중지수 가중치</span></div>
+            {COMPOSITE_INDICATORS.map((ind) => (
+              <div className="wrow" key={ind.key}>
+                <div className="wrow-top">
+                  <span>{ind.label}{ind.invert ? ' (작을수록↑)' : ''}</span>
+                  <b>{weights[ind.key]}</b>
+                </div>
+                <input type="range" min="0" max="3" step="1" value={weights[ind.key]}
+                  onChange={(e) => onWeights({ ...weights, [ind.key]: Number(e.target.value) })} />
+              </div>
+            ))}
+            <div className="wpanel-note">높을수록 1인·고령·소규모 가구 집중. 정규화(min-max) 후 가중 평균 → 0~100점.</div>
+          </div>
+        )}
 
         <div className="sb-legend">
           <span>{metric.fmt(min)}</span>
