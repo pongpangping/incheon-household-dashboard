@@ -3,6 +3,7 @@ import RankList from './RankList.jsx'
 import AgeStructure from './AgeStructure.jsx'
 import ScatterAgedOne from './ScatterAgedOne.jsx'
 import TrendChart from './TrendChart.jsx'
+import ClusterCard from './ClusterCard.jsx'
 import { metricBy } from '../lib/metrics.js'
 
 function Card({ n, title, children }) {
@@ -46,6 +47,10 @@ export default function CenterPanel({ rows, summary, trend, link, metricKey, avg
 
       <Card n="5" title="세대수 · 세대당 인구 추이">
         <TrendChart trend={trend} bare />
+      </Card>
+
+      <Card n="6" title="지역 유형 (군집 분석)">
+        <ClusterCard rows={rows} selected={link.selected} onSelect={link.onSelect} />
       </Card>
     </div>
   )

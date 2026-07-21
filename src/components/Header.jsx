@@ -1,7 +1,14 @@
+import { useState } from 'react'
 import { pct } from '../lib/format.js'
 import DataSourceModal from './DataSourceModal.jsx'
 
 export default function Header({ summary }) {
+  const [copied, setCopied] = useState(false)
+  const copyLink = async () => {
+    try { await navigator.clipboard.writeText(window.location.href) }
+    catch (e) { /* noop */ }
+    setCopied(true); setTimeout(() => setCopied(false), 1500)
+  }
   return (
     <header className="header">
       <div className="hd-left">
@@ -11,6 +18,7 @@ export default function Header({ summary }) {
           <small>KOSIS 인구총조사(2023) · 행정안전부 주민등록(2025) 외</small>
         </div>
         <DataSourceModal />
+        <button className="src-btn" onClick={copyLink}>{copied ? '✓ 복사됨' : '🔗 링크 복사'}</button>
       </div>
       <div className="hd-right">
         <div className="hd-chips">

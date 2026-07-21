@@ -142,6 +142,22 @@ button { font-family: inherit; }
 .wrow input[type=range] { width: 100%; accent-color: #0B6BB0; height: 16px; cursor: pointer; }
 .wpanel-note { font-size: 10px; color: var(--ink3); line-height: 1.4; margin-top: 4px; }
 
+/* 군집 유형 카드 */
+.clusters { display: flex; flex-direction: column; gap: 9px; }
+.cl-note { font-size: 10.5px; color: var(--ink3); line-height: 1.45; }
+.cl { border: 1px solid var(--line); border-radius: 11px; padding: 10px 11px; background: var(--surface); transition: border-color .12s; }
+.cl.on { background: var(--muted); }
+.cl-head { display: flex; align-items: center; gap: 7px; margin-bottom: 7px; }
+.cl-head i { width: 10px; height: 10px; border-radius: 3px; flex: none; }
+.cl-head b { font-size: 12.5px; font-weight: 700; color: var(--ink); flex: 1; }
+.cl-head span { font-size: 10.5px; color: var(--ink3); }
+.cl-mem { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 7px; }
+.cl-mem button { border: 1px solid var(--line); background: var(--surface); border-radius: 7px;
+  padding: 3px 8px; font-size: 11px; color: var(--ink2); cursor: pointer; }
+.cl-mem button:hover { background: var(--muted); }
+.cl-mem button.sel { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 650; }
+.cl-avg { font-size: 10.5px; color: var(--ink3); }
+
 /* 산점도 유형 범례 */
 .type-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 2px 0 8px; font-size: 11px; color: var(--ink2); }
 .type-legend span { display: inline-flex; align-items: center; gap: 5px; }

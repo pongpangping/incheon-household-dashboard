@@ -50,6 +50,60 @@ export const COMPOSITE_INDICATORS = [
   { key: 'avgHouseholdSize', label: '세대당 인구', invert: true },
 ]
 
+// ── 데이터 기반 군집 유형화 (k-means) ────────────────────────────────
+// 3개 지표(1인가구율·고령1인비중·세대당인구)를 정규화해 시군구를 유형으로 묶는다.
+// 초기값을 결정적으로 잡아 매번 같은 결과(재현성). AI 임의분류가 아니라 통계 방법.
+const KM_FEATS = ['onePersonRate', 'agedOneShareOfOne', 'avgHouseholdSize']
+const KM_COLORS = ['#0B93EE', '#F5760D', '#8B5CF6', '#10B981']
+
+export function kmeans(rows, k = 3) {
+  const pts = rows.filter((r) => KM_FEATS.every((f) => r[f] != null))
+  if (pts.length < k) return null
+  const range = {}
+  for (const f of KM_FEATS) { const v = pts.map((r) => r[f]); range[f] = { min: Math.min(...v), max: Math.max(...v) } }
+  const norm = (r) => KM_FEATS.map((f) => { const { min, max } = range[f]; return max === min ? 0.5 : (r[f] - min) / (max - min) })
+  const X = pts.map((r) => ({ code: r.code, name: r.name, v: norm(r), row: r }))
+  const dist = (a, b) => Math.sqrt(a.reduce((s, x, i) => s + (x - b[i]) ** 2, 0))
+  // 결정적 초기화: 1인가구율 정규값 기준 정렬 후 균등 간격 k개
+  const sorted = [...X].sort((a, b) => a.v[0] - b.v[0])
+  let cen = Array.from({ length: k }, (_, i) => sorted[Math.round(i * (sorted.length - 1) / (k - 1))].v.slice())
+  let assign = X.map(() => 0)
+  for (let it = 0; it < 40; it++) {
+    const na = X.map((p) => { let bi = 0, bd = Infinity; cen.forEach((c, ci) => { const d = dist(p.v, c); if (d < bd) { bd = d; bi = ci } }); return bi })
+    const nc = cen.map((c, ci) => {
+      const mem = X.filter((_, i) => na[i] === ci)
+      if (!mem.length) return c
+      return c.map((_, d) => mem.reduce((s, m) => s + m.v[d], 0) / mem.length)
+    })
+    const done = JSON.stringify(nc) === JSON.stringify(cen)
+    cen = nc; assign = na
+    if (done) break
+  }
+  let clusters = cen.map((c, ci) => {
+    const mem = X.filter((_, i) => assign[i] === ci)
+    return {
+      id: ci, color: KM_COLORS[ci % KM_COLORS.length],
+      members: mem.map((m) => ({ name: m.name, code: m.code })),
+      avg: {
+        onePersonRate: mem.reduce((s, m) => s + m.row.onePersonRate, 0) / (mem.length || 1),
+        agedOneShareOfOne: mem.reduce((s, m) => s + m.row.agedOneShareOfOne, 0) / (mem.length || 1),
+        avgHouseholdSize: mem.reduce((s, m) => s + m.row.avgHouseholdSize, 0) / (mem.length || 1),
+      },
+    }
+  }).filter((c) => c.members.length)
+  // 유형명: 군집끼리 상대 비교로 부여(중복 방지, 데이터 기반)
+  clusters.forEach((c) => { c.name = '혼합형' })
+  const byHH = [...clusters].sort((a, b) => b.avg.avgHouseholdSize - a.avg.avgHouseholdSize)
+  if (byHH[0]) byHH[0].name = '가족·정주형'                              // 세대당 인구 최대
+  const rest = clusters.filter((c) => c !== byHH[0]).sort((a, b) => b.avg.agedOneShareOfOne - a.avg.agedOneShareOfOne)
+  if (rest[0]) rest[0].name = '고령·1인 집중형'                          // 남은 것 중 고령 최대
+  if (rest[1]) rest[1].name = '청년·1인 집중형'                          // 그다음
+  for (let i = 2; i < rest.length; i++) rest[i].name = '혼합형'
+  const byCode = {}
+  X.forEach((p, i) => { byCode[p.code] = assign[i] })
+  return { clusters, byCode }
+}
+
 // 선택 구의 집중지수를 지표별 기여도로 분해 (블랙박스가 아니게)
 export function compositeBreakdown(rows, row, weights) {
   if (!row) return null
