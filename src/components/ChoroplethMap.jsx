@@ -67,17 +67,15 @@ function labelAnchor(geom) {
   return [lat, lng]  // Leaflet 순서
 }
 
-export default function ChoroplethMap({ rows, selected, hovered, onSelect, onHover, metricKey, avgFilter, avgValue, showGrid, leftInset = 690 }) {
+export default function ChoroplethMap({ rows, selected, hovered, onSelect, onHover, metricKey, avgFilter, avgValue, showGrid }) {
   const geoRef = useRef(null)
   const mapRef = useRef(null)
   const [map, setMap] = useState(null)
   const [zoom, setZoom] = useState(10)
   const [tilesReady, setTilesReady] = useState(false)   // 타일 로딩 상태 (회색 깜빡임 방지)
   const [tip, setTip] = useState(true)                  // 첫 진입 사용법 힌트
-  // 좌측 패널이 가리는 폭 — 확대·개요 시 지도가 패널 뒤로 숨지 않도록 여백으로 보정
-  const leftInsetRef = useRef(leftInset)
-  leftInsetRef.current = leftInset
-  const viewOpts = () => ({ paddingTopLeft: [leftInsetRef.current, 44], paddingBottomRight: [40, 40] })
+  // 지도는 전용 영역(가운데 열)에 있으므로 여백 보정 불필요
+  const viewOpts = () => ({ padding: [24, 24] })
 
   const { geo, status } = useMemo(() => {
     const features = ((rawGeo && rawGeo.features) || [])
@@ -165,13 +163,8 @@ export default function ChoroplethMap({ rows, selected, hovered, onSelect, onHov
       layer.bindPopup(popupCard(row), { closeButton: true, className: 'm-popup', offset: [0, -4] })
     }
     layer.on({
-      // 지도 객체를 직접 클릭했을 때만 확대(줌) + 팝업 — 패널 선택은 강조만
-      click: () => {
-        onSelect(codeOf(feature))
-        const m = mapRef.current
-        try { m && m.flyToBounds(layer.getBounds(), { ...viewOpts(), maxZoom: 12, duration: 0.7 }) } catch (e) { /* noop */ }
-        layer.openPopup()
-      },
+      // 클릭은 선택·강조·팝업만. 확대는 강제하지 않음(더블클릭/스크롤/±로 사용자가 직접).
+      click: () => { onSelect(codeOf(feature)); layer.openPopup() },
       mouseover: () => onHover?.(codeOf(feature)),
       mouseout: () => onHover?.(null),
     })
@@ -251,8 +244,8 @@ export default function ChoroplethMap({ rows, selected, hovered, onSelect, onHov
         <div className="map-loading"><span className="spin" />지도 불러오는 중…</div>
       )}
       {tip && (
-        <div className="map-tip" style={{ left: `calc(50% + ${leftInset / 2}px)` }}>
-          <b>지도의 구를 클릭</b>하면 확대·상세가 열립니다 · 패널에서 고르면 강조만 됩니다
+        <div className="map-tip">
+          <b>구 클릭</b> = 상세 · <b>더블클릭 / 스크롤</b> = 확대(격자)
           <button onClick={() => setTip(false)} aria-label="닫기">✕</button>
         </div>
       )}

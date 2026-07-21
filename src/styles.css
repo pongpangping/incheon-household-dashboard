@@ -53,9 +53,11 @@ button { font-family: inherit; }
   padding: 7px 14px; border-radius: 9px; }
 
 /* ── 바디: 지도 배경 + 좌측 사이드바 + 중앙 카드 ─────── */
-.body { flex: 1; position: relative; min-height: 0; }
+.body { flex: 1; position: relative; min-height: 0; background: #EDF1F6; }
 
-.map-canvas { position: absolute; inset: 0; z-index: 0; }
+/* 3열 레이아웃: 지도는 가운데 전용 영역(가려지지 않음) */
+.map-canvas { position: absolute; top: 14px; bottom: 14px; left: 320px; right: 378px; z-index: 0;
+  border-radius: 16px; overflow: hidden; border: 1px solid var(--line); box-shadow: var(--shadow-card); }
 .map-canvas .leaflet-container { background: #e9eef5; font: inherit; }
 .map-empty { position: absolute; inset: 0; display: grid; place-items: center; color: var(--ink2); }
 .map-empty code { background: #eef1f6; padding: 3px 8px; border-radius: 6px; }
@@ -63,8 +65,8 @@ button { font-family: inherit; }
 /* ── 사이드바 ───────────────────────────────────────── */
 .sidebar { position: absolute; top: 14px; left: 14px; bottom: 14px; width: 292px; z-index: 20;
   background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
-  box-shadow: var(--shadow-card); padding: 16px; display: flex; flex-direction: column; gap: 18px;
-  overflow-y: auto; }
+  box-shadow: var(--shadow-card); padding: 14px; display: flex; flex-direction: column; gap: 14px;
+  overflow-y: auto; background: #F4F6FA; }
 /* 아코디언 확장 시 자식이 줄어들며 잘리지 않도록 — 넘치면 사이드바가 스크롤 */
 .sidebar > * { flex: none; }
 .sb-badge { display: inline-flex; align-items: center; gap: 9px; }
@@ -166,7 +168,7 @@ button { font-family: inherit; }
 .sb-summary b { font-size: 15px; font-weight: 750; }
 
 /* ── 중앙 차트 카드 열 ──────────────────────────────── */
-.center { position: absolute; top: 14px; left: 320px; bottom: 14px; width: 350px; z-index: 20;
+.center { position: absolute; top: 14px; right: 14px; bottom: 14px; width: 350px; z-index: 20;
   display: flex; flex-direction: column; gap: 12px; overflow-y: auto; padding-right: 2px; }
 .breadcrumb { background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
   box-shadow: var(--shadow-card); padding: 10px 12px 10px 15px; font-size: 12.5px; color: var(--ink3);
@@ -236,16 +238,17 @@ button { font-family: inherit; }
 .map-loading .spin { width: 14px; height: 14px; border-radius: 50%; border: 2px solid #cbd5e1;
   border-top-color: #0B6BB0; animation: spin 0.7s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
-.map-tip { position: absolute; bottom: 26px; left: 50%; transform: translateX(-50%); z-index: 500;
+.map-tip { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 500;
   display: flex; align-items: center; gap: 10px; background: #0F172A; color: #fff; border-radius: 999px;
-  padding: 9px 12px 9px 16px; font-size: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.25); max-width: 90%; }
+  padding: 8px 10px 8px 15px; font-size: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.25); white-space: nowrap; }
 .map-tip b { color: #7CC4FF; }
 .map-tip button { flex: none; width: 20px; height: 20px; border-radius: 50%; border: 0;
   background: rgba(255,255,255,0.16); color: #fff; font-size: 11px; cursor: pointer; }
 .map-tip button:hover { background: rgba(255,255,255,0.28); }
 
-/* 사이드바 기능 그룹 */
-.sb-group { display: flex; flex-direction: column; gap: 11px; }
+/* 사이드바 기능 그룹 — 지도에 영향 / 표에 영향을 각각 박스로 분리 */
+.sb-group { display: flex; flex-direction: column; gap: 11px;
+  border: 1px solid var(--line); border-radius: 14px; padding: 13px; background: var(--surface); }
 .sb-group-head { display: flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 750; color: var(--ink); }
 .sb-group-head em { font-style: normal; font-size: 10.5px; font-weight: 600; color: var(--ink3); }
 .sg-dot { width: 9px; height: 9px; border-radius: 3px; flex: none; }

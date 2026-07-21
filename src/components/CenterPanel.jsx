@@ -17,24 +17,15 @@ function Card({ n, title, children }) {
   )
 }
 
-export default function CenterPanel({ rows, summary, trend, link, metricKey, avgFilter, avgValue, selectedRow, rank, total, weights, open = true, onToggle }) {
+export default function CenterPanel({ rows, summary, trend, link, metricKey, avgFilter, avgValue, selectedRow, rank, total, weights }) {
   const metric = metricBy(metricKey)
   const filterLabel = avgFilter === 'above' ? '평균 이상' : avgFilter === 'below' ? '평균 미만' : null
-
-  if (!open) {
-    return (
-      <button className="center-reopen" onClick={onToggle} title="상세 패널 열기">
-        <span>›</span> 상세·표
-      </button>
-    )
-  }
 
   return (
     <div className="center">
       <div className="breadcrumb">
         <span className="bc-txt">선택 지역<b>{selectedRow?.name ?? '—'}</b> · 지표<b>{metric.label}</b>
           {filterLabel && <> · 필터<b>{filterLabel}</b></>}</span>
-        <button className="center-collapse" onClick={onToggle} title="패널 접기 (지도 넓게 보기)">‹</button>
       </div>
 
       <Card n="1" title="선택 시군구 상세">
