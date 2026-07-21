@@ -231,7 +231,7 @@ button { font-family: inherit; }
 .ccard-sub { font-size: 11px; color: var(--ink3); margin: -4px 0 10px 30px; }
 
 /* ── 지도 위 요소 ───────────────────────────────────── */
-.maplegend { position: absolute; right: 16px; bottom: 26px; z-index: 15; background: var(--surface);
+.maplegend { position: absolute; right: 16px; bottom: 26px; z-index: 1000; background: var(--surface);
   border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow-float); padding: 11px 13px; }
 .maplegend h4 { margin: 0 0 8px; font-size: 12px; font-weight: 700; }
 .ml-row { display: flex; align-items: center; gap: 8px; font-size: 11.5px; color: var(--ink2); padding: 2px 0; }
