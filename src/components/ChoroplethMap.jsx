@@ -203,14 +203,13 @@ export default function ChoroplethMap({ rows, selected, hovered, onSelect, onHov
     try { map.fitBounds(geoRef.current.getBounds(), viewOpts()) } catch (e) { /* noop */ }
   }, [map])
 
-  // 줌 레벨 추적 → 범례는 축소(개요) 상태에서만 표시
+  // 줌 레벨 추적 (격자 표시 여부 판단용)
   useEffect(() => {
     if (!map) return
     const onZoom = () => setZoom(map.getZoom())
     map.on('zoomend', onZoom); setZoom(map.getZoom())
     return () => map.off('zoomend', onZoom)
   }, [map])
-  const showLegend = zoom <= 10
 
   // 범례 버킷 (연속 → 5구간)
   const buckets = useMemo(() => {
@@ -245,7 +244,7 @@ export default function ChoroplethMap({ rows, selected, hovered, onSelect, onHov
         <ZoomControl position="topright" />
       </MapContainer>
 
-      {showLegend && !gridActive && (
+      {!gridActive && (
         <div className="maplegend">
           <h4>{metric.label}</h4>
           {buckets.map((b, i) => (
