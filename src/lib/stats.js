@@ -50,58 +50,36 @@ export const COMPOSITE_INDICATORS = [
   { key: 'avgHouseholdSize', label: '세대당 인구', invert: true },
 ]
 
-// ── 데이터 기반 군집 유형화 (k-means) ────────────────────────────────
-// 3개 지표(1인가구율·고령1인비중·세대당인구)를 정규화해 시군구를 유형으로 묶는다.
-// 초기값을 결정적으로 잡아 매번 같은 결과(재현성). AI 임의분류가 아니라 통계 방법.
-const KM_FEATS = ['onePersonRate', 'agedOneShareOfOne', 'avgHouseholdSize']
-const KM_COLORS = ['#0B93EE', '#F5760D', '#8B5CF6', '#10B981']
+// ── 규칙기반 유형화 (인천 평균 기준 사분면) ──────────────────────────
+// 시군구가 10개뿐이라 군집분석(k-means)은 통계적 근거가 약하고 결과가 불안정하다.
+// 그래서 '발견'이 아니라 '명시적 규칙'으로 나눈다: 1인가구율 × 고령1인비중을
+// 인천 평균 기준으로 갈라 4→3유형. 기준이 투명해 누구나 검증 가능하고,
+// 산점도(④)의 십자선 유형과 정확히 같은 규칙을 쓴다.
+export const TYPOLOGY = {
+  aged:  { key: 'aged',  name: '고령·1인 집중형', color: '#F5760D', rule: '1인가구율 ≥ 평균 · 고령1인 비중 ≥ 평균' },
+  young: { key: 'young', name: '청년·1인 집중형', color: '#0B93EE', rule: '1인가구율 ≥ 평균 · 고령1인 비중 < 평균' },
+  low:   { key: 'low',   name: '1인가구 비집중형', color: '#94A3B8', rule: '1인가구율 < 인천 평균' },
+}
+const TYPE_ORDER = ['aged', 'young', 'low']
 
-export function kmeans(rows, k = 3) {
-  const pts = rows.filter((r) => KM_FEATS.every((f) => r[f] != null))
-  if (pts.length < k) return null
-  const range = {}
-  for (const f of KM_FEATS) { const v = pts.map((r) => r[f]); range[f] = { min: Math.min(...v), max: Math.max(...v) } }
-  const norm = (r) => KM_FEATS.map((f) => { const { min, max } = range[f]; return max === min ? 0.5 : (r[f] - min) / (max - min) })
-  const X = pts.map((r) => ({ code: r.code, name: r.name, v: norm(r), row: r }))
-  const dist = (a, b) => Math.sqrt(a.reduce((s, x, i) => s + (x - b[i]) ** 2, 0))
-  // 결정적 초기화: 1인가구율 정규값 기준 정렬 후 균등 간격 k개
-  const sorted = [...X].sort((a, b) => a.v[0] - b.v[0])
-  let cen = Array.from({ length: k }, (_, i) => sorted[Math.round(i * (sorted.length - 1) / (k - 1))].v.slice())
-  let assign = X.map(() => 0)
-  for (let it = 0; it < 40; it++) {
-    const na = X.map((p) => { let bi = 0, bd = Infinity; cen.forEach((c, ci) => { const d = dist(p.v, c); if (d < bd) { bd = d; bi = ci } }); return bi })
-    const nc = cen.map((c, ci) => {
-      const mem = X.filter((_, i) => na[i] === ci)
-      if (!mem.length) return c
-      return c.map((_, d) => mem.reduce((s, m) => s + m.v[d], 0) / mem.length)
-    })
-    const done = JSON.stringify(nc) === JSON.stringify(cen)
-    cen = nc; assign = na
-    if (done) break
-  }
-  let clusters = cen.map((c, ci) => {
-    const mem = X.filter((_, i) => assign[i] === ci)
+// 한 시군구의 유형: 인천 평균(ax=1인가구율, ay=고령1인비중) 기준
+export function classifyType(row, ax, ay) {
+  if (row == null || row.onePersonRate == null) return null
+  if (row.onePersonRate >= ax) return row.agedOneShareOfOne >= ay ? 'aged' : 'young'
+  return 'low'
+}
+
+// 유형별로 시군구를 묶어 반환 (평균값·멤버 포함)
+export function typologyGroups(rows, ax, ay) {
+  return TYPE_ORDER.map((k) => {
+    const mem = rows.filter((r) => classifyType(r, ax, ay) === k)
+    const avg = (f) => mem.length ? mem.reduce((s, m) => s + (m[f] || 0), 0) / mem.length : 0
     return {
-      id: ci, color: KM_COLORS[ci % KM_COLORS.length],
+      ...TYPOLOGY[k],
       members: mem.map((m) => ({ name: m.name, code: m.code })),
-      avg: {
-        onePersonRate: mem.reduce((s, m) => s + m.row.onePersonRate, 0) / (mem.length || 1),
-        agedOneShareOfOne: mem.reduce((s, m) => s + m.row.agedOneShareOfOne, 0) / (mem.length || 1),
-        avgHouseholdSize: mem.reduce((s, m) => s + m.row.avgHouseholdSize, 0) / (mem.length || 1),
-      },
+      avg: { onePersonRate: avg('onePersonRate'), agedOneShareOfOne: avg('agedOneShareOfOne'), avgHouseholdSize: avg('avgHouseholdSize') },
     }
-  }).filter((c) => c.members.length)
-  // 유형명: 군집끼리 상대 비교로 부여(중복 방지, 데이터 기반)
-  clusters.forEach((c) => { c.name = '혼합형' })
-  const byHH = [...clusters].sort((a, b) => b.avg.avgHouseholdSize - a.avg.avgHouseholdSize)
-  if (byHH[0]) byHH[0].name = '가족·정주형'                              // 세대당 인구 최대
-  const rest = clusters.filter((c) => c !== byHH[0]).sort((a, b) => b.avg.agedOneShareOfOne - a.avg.agedOneShareOfOne)
-  if (rest[0]) rest[0].name = '고령·1인 집중형'                          // 남은 것 중 고령 최대
-  if (rest[1]) rest[1].name = '청년·1인 집중형'                          // 그다음
-  for (let i = 2; i < rest.length; i++) rest[i].name = '혼합형'
-  const byCode = {}
-  X.forEach((p, i) => { byCode[p.code] = assign[i] })
-  return { clusters, byCode }
+  }).filter((g) => g.members.length)
 }
 
 // 선택 구의 집중지수를 지표별 기여도로 분해 (블랙박스가 아니게)
