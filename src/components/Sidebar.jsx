@@ -98,7 +98,7 @@ export default function Sidebar({
           onClick={() => onToggleGrid(!showGrid)}>
           <span className="gt-txt">
             <b>격자 밀집도</b>
-            <em>구 확대 시 500m 격자로 1인가구 밀도 표시</em>
+            <em>구 확대 시 SGIS 1km 격자로 1인가구 밀도 표시</em>
           </span>
           <span className="gt-sw"><i /></span>
         </button>

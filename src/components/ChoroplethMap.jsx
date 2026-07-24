@@ -264,12 +264,12 @@ export default function ChoroplethMap({ rows, selected, hovered, onSelect, onHov
 
       {gridActive && (
         <div className="maplegend">
-          <h4>1인가구 밀도 (500m 격자){rawGrid.sample ? ' · 표본' : ''}</h4>
+          <h4>1인가구 밀도 ({rawGrid.cellKm >= 1 ? '1km' : '500m'} 격자){rawGrid.sample ? ' · 표본' : ''}</h4>
           <div className="ml-scale">
             {HEAT.map((c, i) => <i key={i} style={{ background: c }} />)}
           </div>
-          <div className="ml-ends"><span>낮음</span><span>높음</span></div>
-          <div className="ml-note">셀당 {rawGrid.sample ? '추정 ' : ''}1인가구 수</div>
+          <div className="ml-ends"><span>0</span><span>{gridMax.toLocaleString()}명</span></div>
+          <div className="ml-note">{rawGrid.sample ? '추정 ' : 'SGIS '}셀당 1인가구 수{rawGrid.sample ? '' : ' (2024)'}</div>
         </div>
       )}
     </div>
